@@ -11,7 +11,6 @@ https://openturns.github.io/openturns/latest/auto_probabilistic_modeling/distrib
 
 @author: Claudia Caudai, Giulio Del Corso, and Federico Volpini
 """
-
 ###############################################################################
 
 
@@ -769,13 +768,765 @@ class random_sampler:
                 self.define_csv(tmp_sample_df, shape = shape, color = color)
         
         self.merge_dataset()
+     
         
+    def generate_images(self):
+        '''
+        Generate the images from the defined dataset.
+        '''
+
+        MDB = MorphShapes_DB_Builder(self.path_save_folder)
+        MDB.generate()
         
+    def auto_process(self):
+        '''
+        Execute all the standard instructions to produce the dataset,.
+        '''
+        
+        self.import_dataset_properties()    
+        self.call_sampler()
+        self.generate_images()
+
+
+
+
+            
+                            
+        
+#%% Class to generate pictures
+class MorphShapes_DB_Builder:
+	def __init__(self, csv_path):
+		''' 
+		Load the data from the given csv_path
+		''' 
+        
+		import pandas as pd
+		import os
+		import shutil
+        
+		path_csv_to_read = os.path.join(csv_path,
+                                      'combined_dataframe.csv')
+		self.df = pd.read_csv(path_csv_to_read)
+        
+		image_save_path = os.path.join(csv_path,'dataset_images')
+        
+        # If exists, destroy
+		if os.path.isdir(image_save_path):
+		    shutil.rmtree(image_save_path)
+		    os.mkdir(image_save_path)  
+		else:
+		    os.mkdir(image_save_path)  
+        
+		self.output_path = image_save_path
+		self.output_csv_filename = path_csv_to_read
+		
+	def generate(self):
+		'''
+		Generates the shape in the canvas based on csv data
+		'''
+
+		area = []
+		area_noise = []
+		
+		for index, row in self.df.iterrows():
+			
+			w, h = row['pixel_resolution_x'], row['pixel_resolution_y']
+			M = Main_Surface(w, h) 
+
+			background = self._get_tuple_or_value(row['background_color'], 
+                                                             [(0, 1),(0, 255)])
+
+			#
+			# the backbround can be 
+			# - a color (tuple of R,G,B values)
+			# - a path to an image (that will be resized to the canvas size) 
+			# 
+			if type(background) is tuple:
+				M.setBackgroundColor(background)
+			else:
+				M.setBackgroundImage(background)
+
+			color = self._get_tuple_or_value(
+				row['color'], 
+				[(0, 1),(0, 255)]
+			)
+
+			sides = row['shape']
+
+			# 
+			# two sides is a segment so skip it
+			# 
+			if sides == 2:
+				area.append(0)
+				area_noise.append(0)
+				continue
+
+			center = (
+				self._remap(
+					row['centre_x'],
+					[(0, 100), (0, w)]
+				),
+				self._remap(
+					row['centre_y'],
+					[(0, 100), (0, h)]
+				)
+			) 
+
+			radius = self._remap(
+				row['radius'],
+				[(0, 100), (0, w)]
+			)
+
+			rotation = row['rotation']
+			morph_percentage = row['deformation']
+
+			M.drawShape(
+			    Shape(
+			        center = center,
+			        radius = radius,
+			        color = color, 
+			        sides = sides, 
+			        rotation = rotation,
+			        morph_percentage = morph_percentage
+			    )
+
+			)
+
+			# 
+			# add holes
+			# 
+			holes = int(row['holes'])
+			if(holes > 1):
+				M.emmental(holes, index)
+
+			area.append(round(M.filled_area, 3))
+
+			mnr, anr = row['multiplicative_noise_regression'], row['additive_noise_regression']
+			area_noise.append(round(M.filled_area * (100 + mnr) + anr, 3))
+
+			# 
+			# add blur
+			# 
+			if(row['blur'] > 0):
+				blur = self._remap(
+					row['blur'],
+					[(0, 100), (0, 10)],
+					rounded = False
+				)
+				M.blur(blur)
+
+			# 
+			# add noise
+			# 
+			if(row['white_noise'] > 0):
+				noise_power = self._remap(
+					row['white_noise'],
+					[(0, 100), (0, 1)],
+					rounded = False
+				) 
+				M.addNoise(noise_power)
+			
+			# 
+			# save output image
+			# 
+			filename = self.output_path+"/"+row['ID_image']+".png"
+			M.save(filename)
+			print (filename+" generated.")
+
+		# 
+		# add the shape area to the data frame
+		# and save the output csv
+		# 
+		self.df['regression_area'] = area
+		self.df['regression_area_noise'] = area_noise
+		self.df.to_csv(self.output_csv_filename)
+
+	
+	def _get_tuple_or_value(self, cell, map_range):
+		# 
+		# check a cell string value if is a tuple
+		# and eventually convert it, remapping the values
+		# 
+		if cell.startswith("("):
+			cell = cell.strip("()")
+			return self._remap(list(map(float, cell.split(','))), map_range)
+		return cell
+
+	def _remap(self, value, map_range, rounded = True):
+		# 
+		# remap a single value or tuple using a range defined as
+		# [ (min_value, max_value), (new_min, new_max) ]
+		# 
+		# es: to remap range 0,1 to 0,255 map_range is:
+		# [ (0, 1), (0, 255) ]
+		# 
+		_mra, _mrb = map_range
+		_min, _max, = _mra
+		_a, _b = _mrb
+		
+		if type(value) is list:
+			value = tuple(map(lambda v: round((_b -_a) * (v - _min) / (_max - _min) +_a), value))
+			return value 
+
+		value = (_b - _a) * (value - _min) / (_max - _min) +_a 
+		return round(value) if rounded else value        
         
         
                 
+#%% Auxiliary functions
         
+# 
+# this class is used to reproduce OpenCV shapes formulas
+# because OpenCV circlular shapes are weird 
+# 
+class PIL_Drawing:
+    def __init__(self, width, height):
+        # 
+        # The drawing surface
+        # 
+        from PIL import Image, ImageDraw
         
+        self._image = Image.new('RGB', (width, height))
+        self._draw = ImageDraw.Draw(self._image)
+        cx = width // 2
+        cy = height // 2
+        self._center = (cx, cy)
+    
+    #
+    # image getter
+    #
+    def image(self):
+        return self._image
+
+    # 
+    # image setter
+    # 
+    def set_image(self, image):
+        self._image = image
+
+    # 
+    # center getter
+    # 
+    def center(self):
+        return self._center
+
+    def fillPoly(self, ptx, color):
+        # 
+        # cv2.fillPoly override
+        # 
+        self._draw.polygon(
+            ptx, 
+            fill = color, 
+            outline = None
+        )
+
+    def circle(self, center, radius, color, width = 1):
+        # 
+        # cv2.circle override
+        # 
+        x, y = center
+        fill_color = None if width > 0 else color
+        
+        self._draw.ellipse(
+            (x - radius, y - radius, x + radius, y + radius),
+            fill_color,
+            color
+        )
+
+    def arc(self, center, axes, start_angle, end_angle, color, filled = True):
+        # 
+        # cv2.ellipse-like override
+        # 
+        x, y = center
+        a1, a2 = axes
+        
+        arc_center = [(x - a1, y - a2), (x + a1, y + a1)]
+                
+        if filled:
+            self._draw.chord(
+                arc_center,
+                start_angle - 90, 
+                end_angle - 90, 
+                color
+            )
+        else: 
+            self._draw.arc(
+                arc_center.
+                start_angle - 90, 
+                end_angle - 90, 
+                color
+            )
+
+    def to_openCV_Image(self):
+        '''
+        Convert PIL image to OpenCV format 
+        ''' 
+        
+        import cv2
+        import numpy as np
+        
+        return cv2.cvtColor(np.array(self._image), cv2.COLOR_RGB2BGR)
+
+    def paste(self, image, coords = (0,0)):
+        # 
+        # paste image into canvas at top-left coords
+        # 
+        self._image.paste(image, coords)
+
+class Shape:
+    def __init__(self, center, radius, color, sides = 1, rotation = 0, morph_percentage = 0):
+        # 
+        # the shapes are all build inscribed inside a circle
+        # so each shape has a center and a radius.
+        # 
+        # if sides is not defined or equals zero,
+        # the result shape is a circle.
+        # 
+        # the shape can be rotated and have a morph percentage 
+        # that makes it stick to a circle
+        # 
+        # each shape is pre-drawn on a square surface 
+        # with dimensions equal to the diameter (+1px) of the 
+        # circle in which it is inscribed, multiplied by 
+        # a variable scale factor depending on the radius itself
+        # 
+        self._center = center
+        self._radius = radius
+        self._color = color
+        self._sides = sides
+        self._rotation = rotation
+        self._morph_percentage = morph_percentage 
+        self._up_factor = 10 if radius < 50 else 2
+        
+    def center(self):
+        return self._center
+
+    def radius(self):
+        return self._radius
+
+    def shape_canvas(self):
+        return self._shape_canvas
+
+    def draw(self, anti_aliasing = True):
+        from PIL import Image
+        
+        canvas_side = (self._radius * 2 + 1) * self._up_factor
+        self._shape_canvas = PIL_Drawing(canvas_side, canvas_side)
+
+        # 
+        # if the number of sides equals zero
+        # the shape is a circle, else a polygon
+        # 
+        if self._sides == 1:
+            self._shape_canvas.circle(
+                self._shape_canvas.center(), 
+                self._radius * self._up_factor, 
+                self._color, 
+                -1
+            )
+        else:
+            ptx = self._generate_vertices()
+            self._shape_canvas.fillPoly(ptx, self._color)
+            # 
+            # the poly is possibly morphed and rotated
+            # 
+            self._morph()
+            self._rotate(anti_aliasing)
+                    
+        # 
+        # the final image is resized to its original size,
+        # using AA filter if required
+        # 
+        resampling = Image.Resampling.BICUBIC if anti_aliasing else Image.Resampling.NEAREST
+
+        original_size = self._shape_canvas.image().size[0] // self._up_factor
+
+        self._shape_canvas.set_image(
+            self._shape_canvas.image().resize(
+                (original_size, original_size), 
+                resampling
+            )
+        )
+
+    def _rotate(self, anti_aliasing):    
+        from PIL import Image
+        
+        if self._rotation == 0 or self._sides == 0:
+            return
+
+        resampling = Image.Resampling.BICUBIC if anti_aliasing else Image.Resampling.NEAREST
+
+        rot = self._shape_canvas.image().rotate(
+            -self._rotation, 
+            resampling, 
+            expand =False
+        )
+
+        self._shape_canvas.set_image(
+            rot
+        )
+
+    def _morph(self):
+        # 
+        # the morph is always calculated from the original shape towards a circle.
+        # the idea is that the canvas area of the figure with morph = 100%
+        # is equal to the canvas of the circle that inscribes it.
+        #  
+        
+        from PIL import Image, ImageDraw
+        from math import pi, sin, radians, cos, dist, sqrt, acos
+        
+        if self._morph_percentage == 0 or self._sides == 0:
+            return 
+
+        # 
+        # set the radius
+        # 
+        R = self._radius * self._up_factor
+
+        # 
+        # set the maximum distance from the center of the circle
+        # to calculate the maximum bending arc
+        # 
+        max_cdy = R * 5
+
+        # 
+        # the rotation angle of the bending arc is 
+        # calculated using the number of sides,
+        # then the position of a vertex is set so as 
+        # to make sure that the dx and dy components are respectively
+        # parallel to the Y axis (dy) and the X axis (dx)
+        #  
+        alpha = 180 // self._sides
+        
+        dx = R * sin(radians(alpha))
+        dy = R * cos(radians(alpha))
+
+        cx, cy = self._shape_canvas.center()
+        vertex = cx + dx, cy + dy
+
+        mask = Image.new("L", self._shape_canvas.image().size, 0)
+        draw = ImageDraw.Draw(mask)
+        draw.ellipse((cx - R, cy - R, cx + R, cy + R), fill=255)
+        
+        # 
+        # the deviation from the center is calculated
+        # in order to have a constant curvature variation 
+        # as the morph percentage varies#
+        # 
+        cdy = self._calcCDY(max_cdy)
+        
+        # 
+        # move the center of the circle and 
+        # recalculated the radius and the dy component
+        # 
+        center = (cx, cy - cdy)
+
+        R = round(dist(center, vertex))
+        dy = sqrt(R**2 - dx**2)
+        
+        #
+        # the subtended arc angle increased by an X value
+        # to make sure all the arcs close the edges
+        #   
+        alpha_arc = round(acos((dy**2 + R**2 - dx**2) / (2 * dy * R)) * 180 / pi) + 0.5
+        # 
+        # the arc will have to be drawn and rotated N times around the center
+        # based on the number of vertices of the shape
+        # 
+        rotation_step = round(360 / self._sides)
+
+        for side in range(0, 360 - rotation_step + 1 , rotation_step):
+            self._shape_canvas.arc(
+                center, 
+                (R, R), 
+                180 + side - alpha_arc, 
+                180 + side + alpha_arc, 
+                self._color, 
+                True
+            ) 
+            center = self._rotate_point(
+                center, 
+                self._shape_canvas.center(), 
+                -rotation_step
+            )
+        
+        # 
+        # the final result is masked
+        # to remove edges noise
+        # 
+        blank = self._shape_canvas.image().point(lambda _: 0)
+        c = Image.composite(
+            self._shape_canvas.image(), 
+            blank, 
+            mask
+        )
+
+        self._shape_canvas.set_image(c)
+
+    def refillblack(self, image, background_color):
+        d = image.getdata()
+        new_image = []
+
+        for item in d:
+            if item[0] == 0:
+                new_image.append(background_color)
+            else:
+                new_image.append(item)
+         
+        image.putdata(new_image)
+        return image
+
+    def _calcCDY(self, max_cdy):
+        # 
+        # the main formula to calcolate the arc of morphing
+        # 
+        
+        from math import cos, radians, sqrt
+        
+        R = self._radius * self._up_factor
+        n = self._sides
+        l = R * sqrt(2 - 2 * cos(radians(360 / n)))
+        R1 = sqrt(R**2 - (l / 2)**2)
+        d1 = self._morph_percentage / 100 * (R - R1)
+        d2 = ((l/2)**2 - 2 * d1 * R1 - d1**2) / (2 * d1)
+        return round(d2) if d2 < max_cdy else max_cdy 
+
+    def _rotate_point(self, point, origin, degrees):
+        #
+        # Rotate a point counterclockwise by a given angle around a given origin.
+        #
+        
+        from math import radians, cos, sin
+        
+        rad = radians(degrees)
+        x,y = point
+        offset_x, offset_y = origin
+        adjusted_x = (x - offset_x)
+        adjusted_y = (y - offset_y)
+        cos_rad = cos(rad)
+        sin_rad = sin(rad)
+        qx = offset_x + cos_rad * adjusted_x + sin_rad * adjusted_y
+        qy = offset_y + -sin_rad * adjusted_x + cos_rad * adjusted_y
+        return round(qx), round(qy)
+        
+    def _generate_vertices(self):
+        vertices = []
+        center = self._shape_canvas.center()
+
+        # 
+        # the first vertex is always the top one
+        # 
+        top = (center[0], center[1] - self._radius * self._up_factor)
+        
+        # 
+        # if the shape has an even number of sides,
+        # a pre-rotation is applied
+        # 
+        if self._sides % 2 == 0:
+            top = self._rotate_point(top, center, 180 // self._sides)
+        
+        for i in range(self._sides):
+            vertices.append(self._rotate_point(top, center, i * 360 / self._sides))
+
+        return vertices
+
+class Main_Surface:
+    def __init__(self, width, height):
+        # 
+        # The main canvas where the shape(s) is/are drawn
+        # 
+        self._main_surface = PIL_Drawing(width, height)
+        self.shape = None
+        self.filled_area = 0
+        self.background_color = (0, 0, 0)
+        self.backgroundImage = None
+        self.image_set = False
+        self.noise_power = 0 
+
+    def setBackgroundColor(self, background_color):
+        self.background_color = background_color
+
+    def setBackgroundImage(self, path):
+        from PIL import Image
+        
+        self.backgroundImage = Image.open(path)
+        self.backgroundImage = self.backgroundImage.resize(
+            self._main_surface.image().size, 
+            Image.Resampling.BICUBIC
+        )
+        
+    def drawShape(self, shape, sides = 0, anti_aliasing = True):
+        if self.shape != None:
+            return
+        # 
+        # add a shape and draw it in the main canvas
+        # 
+        shape.draw(anti_aliasing)
+
+        cx, cy = shape.center()
+        R = shape.radius()
+           
+        self._main_surface.paste(
+            shape.shape_canvas().image(), 
+            (cx - R, cy - R)
+        )
+        
+        self.shape = shape
+        self.filled_area = self._calcArea()
+        
+    def _prepareImage(self):
+        from PIL import Image
+        import numpy as np
+        import cv2
+
+        if (self.backgroundImage == None and self.background_color == None) or self.image_set:
+            return
+
+        mask = self._getImageMask()
+        mask = Image.fromarray(mask)
+    
+        background = self.backgroundImage if self.backgroundImage != None else Image.new("RGB",self._main_surface.image().size,self.background_color)
+      
+        self._main_surface.set_image(
+            Image.composite(
+                self._main_surface.image(), 
+                background, 
+                mask
+            )
+        )
+
+        if self.noise_power != None:
+            # 
+            # add weighted gaussian noise to the original image
+            # power is the alpha channel of the noise and
+            # its value must be between 0 and 1
+            # 
+            im = np.array(self._main_surface.image())
+            width, height = self._main_surface.image().size
+
+            mean = 0
+            stddev = 128
+
+            noise = np.zeros((width, height, 3), dtype = np.uint8)
+
+            for i in range(len(noise) - 1):
+                cv2.randn(noise[i], mean, stddev)
+
+            im_new = cv2.addWeighted(
+                noise, 
+                self.noise_power, 
+                im, 
+                1, 
+                0, 
+                im
+            );
+
+            self._main_surface.set_image(
+                Image.fromarray(im_new)
+            )
+
+        self.image_set = True
+       
+    def blur(self, power = 2):
+        # 
+        # blur the final image
+        # 
+        from PIL import ImageFilter
+        
+        self._main_surface.set_image(
+            self._main_surface.image().filter(ImageFilter.GaussianBlur(power))
+        )
+
+    def addNoise(self, noise_power = 0.5):
+        self.noise_power = noise_power
+
+    def emmental(self, holes = 2, seed_index = None):
+        # 
+        # create hole(s) on the main canvas
+        # 
+        
+        from random import randint, seed
+        from math import sin, cos, radians
+        
+        if seed_index != None:
+            seed(seed_index)
+
+        shape = self.shape
+        cx, cy = shape.center()
+        R = shape.radius()
+            
+        for hole in range(holes):
+            alpha = randint (0,359)
+            dx = round(R * sin(radians(alpha)))
+            dy = round(R * cos(radians(alpha)))
+
+            center = (cx + dx , cy + dy)
+            hole_radius = randint(R // 2, R * 2 // 3)
+
+            self._main_surface.circle(
+                center,
+                hole_radius,
+                (0, 0, 0),
+                -1
+            )
+
+
+    def show(self):
+        # 
+        # show the result on screen
+        # 
+        
+        import cv2
+        
+        self._prepareImage()
+        cv2.imshow(
+            "Final Result", 
+            self._main_surface.to_openCV_Image()
+        )
+        cv2.waitKey(0)
+
+    def save(self, filename):
+        # 
+        # saves the result on the filesystem
+        #
+        self._prepareImage()
+        self._main_surface.image().save(filename)
+
+    def _getImageMask(self):
+        # 
+        # return the mask of the shape
+        # calculated with a threshold value
+        # 
+        
+        import cv2
+        import numpy as np
+        
+        L= cv2.cvtColor(np.array(self._main_surface.image()), cv2.COLOR_RGB2HSV)
+        h, s, v = cv2.split(L)
+        min_v, max_v = np.min(v), np.max(v)
+        mask = np.zeros((L.shape[0], L.shape[1]), dtype=np.uint8)
+
+        for i in range(L.shape[0]):
+            for j in range(L.shape[1]):
+                mask[i,j] = int((v[i,j] - min_v) * 255 / (max_v - min_v)) if ((max_v - min_v) > 0) else 255
+                if mask[i,j] >= 240:
+                    mask[i,j] = 255
+
+        return mask
+
+    def _calcArea(self):
+        # 
+        # calculate the area of the shape in %
+        # based on non zero pixel
+        # 
+        
+        import numpy as np
+        
+        mask = self._getImageMask()
+        w,h = self._main_surface.image().size
+        pixels = np.count_nonzero(mask)
+        return pixels / (w * h) * 100                
         
         
         
