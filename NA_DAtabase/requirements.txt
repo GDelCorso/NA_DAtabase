@@ -1,0 +1,9 @@
+# Needed packages/versions
+
+          'os',
+          'shutil'
+          'pandas'
+          'numpy'
+          'openturns'
+          'random'
+
