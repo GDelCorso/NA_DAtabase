@@ -23,3 +23,9 @@ import NA_Database as nad
     
 d=nad.dataset_sampler()
 
+# ----------------------------------------- #
+
+# In order to save dataset_properties.csv, shapes_colors_probabilities.csv and dataset_correlation.csv', we can use:
+    
+d.save_data()
+
