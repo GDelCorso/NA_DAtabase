@@ -163,7 +163,6 @@ class random_sampler:
                 pd.read_csv(self.path_sampler_properties)
                 
             # Define the useful variables:
-            self.dataset_name = self.sampler_properties['dataset_name'][0]
             self.dataset_size = self.sampler_properties['dataset_size'][0]
             self.sampling_strategy = \
                 self.sampler_properties['sampling_strategy'][0]
