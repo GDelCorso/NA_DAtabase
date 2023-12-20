@@ -2,11 +2,7 @@
 """
 Created on Sun Nov 19 21:00:10 2023
 
-1) SISTEMARE DOCSTRING
-
 2) SISTEMARE TODO
-
-3) IMPOSTARE NOME DATASET CON CURA!
 
 4) IMPORTARE MATRICE CORRELAZIONE
 
@@ -112,6 +108,8 @@ class random_sampler:
             shutil.rmtree(self.path_save_dataset)
             os.mkdir(self.path_save_dataset)    
             
+        # Define the maximum amount of resampling:
+        self.max_find_another = 100000
             
         
     def import_dataset_properties(self, 
@@ -130,6 +128,7 @@ class random_sampler:
         # Libraries
         import os
         import pandas as pd
+        import numpy as np
         
         # Update datasets with different name
         if path_dataset_properties != None:  
@@ -153,8 +152,7 @@ class random_sampler:
             
             # Colors and shape probabilities:
             self.shapes_colors = \
-                  pd.read_csv(self.path_shapes_colors)  
-                  
+                  pd.read_csv(self.path_shapes_colors)       
         
             # Correlation matrix:
             self.dataset_correlation = \
@@ -184,15 +182,18 @@ class random_sampler:
                 int(self.sampler_properties['pixel_resolution_y'][0])
                 
             self.correct_class = \
-                self.sampler_properties['correct_classes'].to_list()
-                
-            self.noise_order = \
-                self.sampler_properties['noise_order'].to_list()
+                self.sampler_properties['correct_classes']\
+                    .replace(np.nan, None).to_list()
+            self.correct_class = [i for i in self.correct_class if i is not None]    
                 
             self.classification_noise = \
                 self.sampler_properties['classification_noise'].to_list()
             
-            self.extra = self.sampler_properties['extra'][0]
+            self.out_of_border = self.sampler_properties['out_of_border']\
+                .replace(np.nan, None).to_list()
+            self.out_of_border = \
+                [i for i in self.out_of_border if i is not None][0]   
+            self.out_of_border = True
             
             self.background_color = \
                 self.sampler_properties['background_color'][0]
@@ -440,8 +441,6 @@ class random_sampler:
                                                      Copula)    
         multi_distribution.setDescription(self.marginal_list_names)
         
-        # TODO Condizione sul centro e sul bordo
-        
         return multi_distribution
     
     
@@ -458,6 +457,9 @@ class random_sampler:
         import os
         import pandas as pd
         import numpy as np
+        import random
+        
+        random.seed(self.random_seed)
         
         # Define the dictionary to define the correct list name
         sample_df = pd.DataFrame(sample_df.to_numpy(), 
@@ -478,9 +480,6 @@ class random_sampler:
         sample_df['pixel_resolution_x'] = self.pixel_resolution_x
         sample_df['pixel_resolution_y'] = self.pixel_resolution_y
         
-        # Add noises order
-        sample_df['noise_order'] = str(self.noise_order).replace('\'','')
-        
         # Define the regression ground truth - radius
         sample_df['regression_radius'] = sample_df['radius']
         sample_df['regression_radius_noise'] = sample_df['radius']*\
@@ -488,26 +487,32 @@ class random_sampler:
                 +sample_df['additive_noise_regression']
         
         # Define the regression ground truth - centering
-        sample_df['regression_centering'] = np.sqrt((sample_df['centre_x']-50)**2+(sample_df['centre_y']-50)**2)
-        sample_df['regression_centering_noise'] = sample_df['regression_centering']*\
+        sample_df['regression_centering'] = \
+           np.sqrt((sample_df['centre_x']-50)**2+(sample_df['centre_y']-50)**2)
+        sample_df['regression_centering_noise'] = \
+            sample_df['regression_centering']*\
             (100+sample_df['multiplicative_noise_regression'])/100\
                 +sample_df['additive_noise_regression']
                 
         # Define the correct shapes and colors
-        correct_shapes = []
-        correct_colors = []
-        correct_shapes_and_colors = []
+        correct_shapes = [] # ONLY shapes
+        correct_colors = [] # ONLY color
+        correct_shapes_and_colors = [] # Shapes and colors
+        
         
         for i_list in range(len(self.correct_class)):
-            if len(self.correct_class[i_list].split(';')) >1:
+            tmp_correct_class = self.correct_class[i_list].split('/')
+            tmp_correct_class =  [i for i in tmp_correct_class if i != '']   
+
+            if len(tmp_correct_class) >1:
                 correct_shapes_and_colors.append(\
-                                                 [int(self.correct_class[i_list].split(';')[0]),\
-                                                 self.correct_class[i_list].split(';')[1].replace(' ','')])
+                                                 [int(tmp_correct_class[0]),\
+                                                 tmp_correct_class[1].replace(' ','')])
             else:
                 if ('(' in self.correct_class[i_list]): # Color
-                    correct_colors.append(self.correct_class[i_list].replace(' ',''))
+                    correct_colors.append(self.correct_class[i_list].split('/')[1].replace(' ',''))
                 else:
-                    correct_shapes.append(int(self.correct_class[i_list].replace(' ','')))
+                    correct_shapes.append(int(self.correct_class[i_list].split('/')[0].replace(' ','')))
         
         # Noisy classification class                                 
         sample_df['shape_noisy'] = sample_df['shape']
@@ -531,20 +536,71 @@ class random_sampler:
             for noisy_class in self.classification_noise:
                 try:
                     noisy_class_split = noisy_class.split(';')                
-                    first_class_shape = noisy_class_split[0].replace('[','').replace(']','').split('/')[0]
+                    first_class_shape = noisy_class_split[0].replace('[','').replace(']','').split('/')[0] # If empty len() == 0
                     first_class_color = noisy_class_split[0].replace('[','').replace(']','').split('/')[1]
                     second_class_shape = noisy_class_split[1].replace('[','').replace(']','').split('/')[0]
                     second_class_color = noisy_class_split[1].replace('[','').replace(']','').split('/')[1]
                     change_probability = noisy_class_split[2]
                     
-                    # Check shape:
-                    # TODO
+                    # Check the original shape:
+                    # The input should be: 
+                    #[original_shape/original_color];[new_shape/new_color];prob
+                    # If an original element is empty, implies that every choices
+                    # are acceptable
+                    # Viceversa, if output is empty, it implies that remains the same
+                    # If output is *, it sample randomly
+                    
+                    if (row['shape'] == first_class_shape)\
+                                                 or(len(first_class_shape)==0):
+                                                         # Check also color (or empty (all) color)
+                        if (row['color'] == first_class_color)\
+                                                 or(len(first_class_color)==0):
+                                                     
+                            # Randomly sample a number between [0,1]
+                            
+                            random_sampled = random.randint(1,100)
+                            if random_sampled <= \
+                                            int(float(change_probability)*100):
+                                
+                                # We want to change to second shape and second
+                                # color. But if ALL is active, we must resample
+                                if len(second_class_shape)>0:
+                                    # Or remain the same or randomly resample:
+                                    if second_class_shape == '*':
+                                        candidate_shape = self.list_shapes\
+                                            [random.randint(0, \
+                                                      len(self.list_shapes)-1)]
+                                    else:
+                                        candidate_shape = second_class_shape
+                                else:
+                                    # Mantain the original value:
+                                    candidate_shape = \
+                                                   sample_df.loc[i_row,'shape']
+                                
+                                if len(second_class_color)>0:
+                                    if (second_class_color == '*'):
+                                        candidate_color = self.list_colors\
+                                            [random.randint(0, \
+                                                      len(self.list_colors)-1)]
+                                    else:
+                                        candidate_color = second_class_color
+                                else:
+                                    candidate_color = \
+                                                   sample_df.loc[i_row,'color']
+                                
+                                sample_df.loc[i_row,'shape_noisy'] = \
+                                                                candidate_shape
+                                sample_df.loc[i_row,'color_noisy'] = \
+                                                                candidate_color
                 except:
                     pass
-                
-            #TODO
             
-                
+            # Redefine the row (updated)
+            row = sample_df.iloc[i_row]
+            
+            # Check if shape is correct
+            if int(row['shape']) in list(correct_shapes):
+                sample_df.loc[i_row,'correct_class'] = True
             if int(row['shape_noisy']) in list(correct_shapes):
                 sample_df.loc[i_row,'noisy_class'] = True
                 
@@ -559,12 +615,15 @@ class random_sampler:
                 element_shape = element[0]
                 element_color = element[1]
                 
-                if (int(row['shape']) == element_shape)and(str(row['color']) == element_color):
+                if (int(row['shape']) == element_shape)and(str(row['color']) \
+                                                             == element_color):
                     sample_df.loc[i_row,'correct_class'] = True    
-                if (int(row['shape_noisy']) == element_shape)and(str(row['color_noisy']) == element_color):
+                if (int(row['shape_noisy']) == element_shape)and\
+                                    (str(row['color_noisy']) == element_color):
                     sample_df.loc[i_row,'noisy_class'] = True   
                     
-        path_save_csv = os.path.join(self.path_save_dataset, 'partial_'+str(shape)+'_'+str(color)+'.csv')
+        path_save_csv = os.path.join(self.path_save_dataset, \
+                                   'partial_'+str(shape)+'_'+str(color)+'.csv')
         sample_df.to_csv(path_save_csv, index = False)
     
     
@@ -609,7 +668,6 @@ class random_sampler:
         
         # Define the list of shapes and colors:
         self.list_shapes = (self.shapes_colors.columns).to_list()[1:]
-        
         self.list_colors = (self.shapes_colors).iloc[:,0].values.tolist()
         
         # Define the combined distribution with the given copula
@@ -639,7 +697,53 @@ class random_sampler:
                 if self.sampling_strategy == 'MC':  
                     tmp_sample_df = multi_distribution.getSample\
                                             (tmp_dataset_size).asDataFrame()
-                    
+                                            
+                # If the method is Monte Carlo and out_of_border is False, 
+                # center outside the border are not allowed and resampled
+                    resampler_seed = 1
+                    if (self.out_of_border == False):
+                        # Find elements which have center outside the border:
+                        for i_row in range(len(tmp_sample_df)):
+                            resampler_seed += 1
+                            row = tmp_sample_df.iloc[i_row]
+                            centre_x = float(row['centre_x'])
+                            centre_y = float(row['centre_x'])
+                            radius = float(row['radius'])
+                            
+                            # Check if centre is too close to the border:
+                            find_another = 0
+                            if (centre_x<radius)or(centre_x>100-radius)or\
+                                    (centre_y<radius)or(centre_y>100-radius):
+                                        
+                                while find_another < self.max_find_another:
+                                    find_another += 1
+                                    ot.RandomGenerator.SetSeed(\
+                                                             self.random_seed*\
+                                                                seed_modifier*\
+                                                                 find_another*\
+                                                                resampler_seed)
+                                    # Find another candidate:
+                                    tmp_resampling_df = \
+                                                  multi_distribution.getSample\
+                                                  (1).asDataFrame()    
+                                    row_resampled = tmp_resampling_df.iloc[0]
+                                    centre_x_resampled = \
+                                               float(row_resampled['centre_x'])
+                                    centre_y_resampled = \
+                                               float(row_resampled['centre_x'])
+                                    radius_resampled = \
+                                                 float(row_resampled['radius'])
+                                    
+                                    if (centre_x_resampled>radius_resampled)and\
+                                       (centre_x_resampled<100-radius_resampled)and\
+                                       (centre_y_resampled>radius_resampled)and\
+                                       (centre_y_resampled<100-radius_resampled):
+                                         # Stop the while cycle:
+                                         find_another = self.max_find_another+1       
+                                         
+                                         # Change the original row:
+                                         tmp_sample_df.iloc[i_row] = \
+                                                                  row_resampled 
                 # Latin Hyper Cube Sampling
                 elif self.sampling_strategy == 'LHC':
                     exp = ot.LHSExperiment(multi_distribution, \
@@ -653,10 +757,14 @@ class random_sampler:
                                 multi_distribution, tmp_dataset_size, False)
                     tmp_sample_df = exp.generate().asDataFrame()
                 else:
-                    
                     print("WARNING: sampling strategy definition.")
                     tmp_sample_df = multi_distribution.getSample\
                                             (tmp_dataset_size).asDataFrame()
+                                            
+                # Convert the float variable (holes) to an integer one:
+                for i_row in range(len(tmp_sample_df)):
+                    row = tmp_sample_df.iloc[i_row]
+                    tmp_sample_df.loc[i_row,'holes'] = int(round(row['holes']))
                 
                 # Call the method to produce the csv for the given sample
                 self.define_csv(tmp_sample_df, shape = shape, color = color)
