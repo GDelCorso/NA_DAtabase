@@ -12,7 +12,10 @@ setup(
           'pandas',
           'numpy',
           'openturns',
-          'random'
+          'random',
+          'PIL',
+          'cv2',
+          'math'
           ]
       )
 
