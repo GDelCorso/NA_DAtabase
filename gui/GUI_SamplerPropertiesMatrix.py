@@ -11,7 +11,7 @@ from customtkinter import *
 from GUI_helper import *
 from GUI_MyColorPicker import *
 
-class sMatrix():
+class SamplerPropertiesMatrix():
 	def __init__(self, tab, error_msg, success_msg):
 		# callcack di
 		self.error_msg = error_msg
@@ -124,7 +124,7 @@ class sMatrix():
 		self.cc_textbox.grid(row=1, column=2, pady=5, rowspan="4",padx=5,sticky='nswe')
 		
 		rfb = CTkFrame(rf)
-		rft.grid_columnconfigure((1,2,3,4,5,6), weight=1)
+		rfb.grid_columnconfigure((1,2,3,4,5,6), weight=1)
 		rfb.grid(row=1, column=0, pady=5, padx=5,sticky="nswe")
 		
 		CTkLabel(rfb, text='Classification noise:').grid(row=0, column=0, columnspan="7", padx=5, pady=0, sticky='we')

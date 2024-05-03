@@ -12,7 +12,7 @@ import os
 #internal import
 from GUI_helper import *
               
-class GUI_p_matrix_interface:
+class GUI_ShapesAndColorsMatrix_interface:
 
     
     def __init__(self, dataset_name = 'outputs_folder', round_normalization=5):
@@ -365,7 +365,7 @@ class GUI_p_matrix_interface:
 
     def get_save_date_path(self):
         return os.path.join(self.get_save_folder(),\
-                                            'shapes_colors_p_matrix.csv')
+                                            'shapes_colors_ShapesAndColorsMatrix.csv')
 
     def get_save_folder(self):
         path_data = os.getcwd()

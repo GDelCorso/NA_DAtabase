@@ -7,17 +7,18 @@ from customtkinter import *
 from CTkMessagebox import CTkMessagebox
 
 #internal import
-from GUI_p_matrix_interface import *
+from GUI_ShapesAndColorsMatrix_interface import *
 from GUI_helper import *
 from GUI_MyColorPicker import *
 
-class pMatrix():
-	def __init__(self, tab, error_msg, success_msg, s_matrix, d_matrix):
+class ShapesAndColorsMatrix():
+	def __init__(self, tab, error_msg, success_msg, SamplerPropertiesMatrix, MultivariateDistributionMatrix, UncertantiesMatrix):
 		self.error_msg = error_msg
 		self.success_msg = success_msg
 		# dependency injection
-		self.s_matrix = s_matrix
-		self.d_matrix = d_matrix
+		self.SamplerPropertiesMatrix = SamplerPropertiesMatrix
+		self.MultivariateDistributionMatrix = MultivariateDistributionMatrix
+		self.UncertantiesMatrix = UncertantiesMatrix
 		# list of shape's p cells
 		self.shapes = []
 		# list of color's p cells
@@ -45,7 +46,7 @@ class pMatrix():
 		self.df.grid(row=1, column=0, padx=0, sticky="ew")
 
 	def init_G(self, db_name):
-		self.G = GUI_p_matrix_interface(db_name)
+		self.G = GUI_ShapesAndColorsMatrix_interface(db_name)
 		
 	def do_undo(self):
 		self.G.undo()
@@ -95,7 +96,8 @@ class pMatrix():
 			})
 			# add shape in GUI_interface
 			self.G.new_shape(vertices)
-			self.d_matrix.new_shape(vertices, self.G)
+			self.MultivariateDistributionMatrix.new_shape(vertices, self.G)
+			self.UncertantiesMatrix.new_shape(vertices, self.G)
 			
 			# place the frame in the gui
 			sf.grid(row=0, column=len(self.G.shape_order))
@@ -151,9 +153,9 @@ class pMatrix():
 		})
 		# add color in GUI_interface
 		self.G.new_color(color_picked)
-		self.d_matrix.new_color(color_picked, self.G)
+		self.MultivariateDistributionMatrix.new_color(color_picked, self.G)
+		self.UncertantiesMatrix.new_color(color_picked, self.G)
 			
-		
 		# place the frame in the gui
 		cf.grid(row=len(self.G.color_order), column=0)
 
@@ -393,5 +395,6 @@ class pMatrix():
 		print (self.G.probability_matrix)	
 
 		#update other matrix
-		self.s_matrix.update(self.G)
-		self.d_matrix.update(self.G)
+		self.SamplerPropertiesMatrix.update(self.G)
+		self.MultivariateDistributionMatrix.update(self.G)
+		self.UncertantiesMatrix.update(self.G)

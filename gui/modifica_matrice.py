@@ -49,7 +49,7 @@ if not np.all(np.linalg.eigvals(M) > 0):
 else:
     print("Perdiana, che fortuna, è definita positiva!")
           
-
+print(M)
           
 #%% L'utente preme il tasto "Make it definite positive"
 M,s = find_s(M)  # Questo normalizza tutto  

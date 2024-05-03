@@ -34,7 +34,8 @@ class EntryHelper():
 		update a probability value in Textbox entry
 		'''
 		e.delete(0,END)
-		e.insert(0,txt)
+		if txt != None:
+			e.insert(0,txt)
 
 class TextboxHelper():
 

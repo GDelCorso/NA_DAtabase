@@ -10,18 +10,12 @@ from customtkinter import *
 #internal import
 from GUI_helper import *
 
-class vMatrix():
+class ContinuousDistributionMatrix():
 	continuous_variables = [
 		'centre_x',
 		'centre_y',
 		'radius',
-		'rotation_(degrees)',
-		'deformation',
-		'blur',
-		'white_noise',
-		'holes',
-		'additive_noise_regression',
-		'multiplicative_noise_regression'
+		'rotation_(degrees)'
 	]
 
 	def __init__(self, tab, error_msg, success_msg):
@@ -67,35 +61,7 @@ class vMatrix():
 			'rotation_(degrees)': {
 				'cbox': 'constant',
 				'mean': 0
-			},
-			'deformation': {
-				'cbox': 'constant',
-				'mean': 0
-			},
-			'blur': {
-				'cbox': 'constant',
-				'mean': 0
-			},
-			'white_noise': {
-				'cbox': 'constant',
-				'mean': 0
-			},
-			'holes': {
-				'cbox': 'constant',
-				'mean': 0
-			},
-			'deformation': {
-				'cbox': 'constant',
-				'mean': 0
-			},
-			'additive_noise_regression': {
-				'cbox': 'constant',
-				'mean': 0
-			},
-			'multiplicative_noise_regression': {
-				'cbox': 'constant',
-				'mean': 0
-			},
+			}
 		}
 
 		self.ranges = {
