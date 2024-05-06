@@ -36,7 +36,7 @@ class MultivariateDistributionMatrixTop(CTkToplevel):
 			for j in range (d_matrix.shape[1]):
 				self.entries[i][j] = self._entry(i,j)
 
-		CTkButton(self, text="Save", font=(None,16), command=self.save).grid(row=11, column=0, columnspan=11,pady=10,padx=10,sticky="e")
+		CTkButton(self, text="Update", font=(None,16), command=self.save).grid(row=11, column=0, columnspan=11,pady=10,padx=10,sticky="e")
 		CTkLabel(self, text="Remember to hit enter key,tab key or change focus by clicking on other cells to update the values.").grid(row=12, column=0, columnspan=11,pady=10,padx=10,sticky="ew")
 		
 		self.warning = CTkLabel(self, text="", bg_color="#222", text_color="#f66")

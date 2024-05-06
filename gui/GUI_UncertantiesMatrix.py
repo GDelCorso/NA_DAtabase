@@ -101,10 +101,13 @@ class UncertantiesMatrix():
 		return
 		
 	def _empty_cell_matrix(self):
+		entries = np.empty((len(self.continuous_variables), len(self.index)), dtype=object)
+		entries.fill('')
+		
 		EV = {
 			'list': [],
 			'cbox': ['constant' for i in range(len(self.continuous_variables))],
-			'entries' : np.empty((len(self.continuous_variables), len(self.index)), dtype=object)
+			'entries' : entries
 		}
 
 		EV['entries'][:, 1] = 1

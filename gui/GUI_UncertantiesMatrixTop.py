@@ -28,7 +28,8 @@ class UncertantiesMatrixTop(CTkToplevel):
 
 		self.cbox = {
 			'shape': [],
-			'color': []
+			'color': [],
+			'cv': []
 		}
 
 		self.title("Uncertanties")
@@ -41,7 +42,7 @@ class UncertantiesMatrixTop(CTkToplevel):
 			
 		
 		self.entries = np.empty((len(self.parent.continuous_variables), len(self.parent.index)), dtype=object)
-		
+
 		self.cbox_lock_values = {
 			'constant' : ['lower_bound', 'sigma', 'upper_bound'],
 			'uniform': ['mean', 'sigma'],
@@ -95,9 +96,9 @@ class UncertantiesMatrixTop(CTkToplevel):
 
 		cb_shape = self.add_cbox(rfb, 'shape2',1,3)
 		
-		c=CTkCheckBox(rfb, text="R", width=1, variable=self.cn['cb_shape'], onvalue="disabled", offvalue="normal",command=lambda: cb_shape.configure(state=self.cn['cb_shape'].get()))
-		c.deselect()
-		c.grid(row=1, column=5, padx=5)
+		self.c1=CTkCheckBox(rfb, text="R", width=1, variable=self.cn['cb_shape'], onvalue="disabled", offvalue="normal",command=lambda: cb_shape.configure(state=self.cn['cb_shape'].get()))
+		self.c1.deselect()
+		self.c1.grid(row=1, column=5, padx=5)
 
 		self.add_cbox(rfb, 'color1',2,0)
 
@@ -105,9 +106,9 @@ class UncertantiesMatrixTop(CTkToplevel):
 
 		cb_color = self.add_cbox(rfb, 'color2',2,3)
 
-		c=CTkCheckBox(rfb, text="R", width=1, variable=self.cn['cb_color'], onvalue="disabled", offvalue="normal",command=lambda: cb_color.configure(state=self.cn['cb_color'].get()))
-		c.deselect()
-		c.grid(row=2, column=5, padx=5)
+		self.c2=CTkCheckBox(rfb, text="R", width=1, variable=self.cn['cb_color'], onvalue="disabled", offvalue="normal",command=lambda: cb_color.configure(state=self.cn['cb_color'].get()))
+		self.c2.deselect()
+		self.c2.grid(row=2, column=5, padx=5)
 
 		
 		self.p = self.add_entry(rfb, 'Probability', 3, self.cn['probability'], self.v_float)
@@ -135,10 +136,12 @@ class UncertantiesMatrixTop(CTkToplevel):
 		
 		r=1
 		for i in self.parent.continuous_variables:
-			self.add_row(f, i, r)
+			self.cbox['cv'].append(self.add_row(f, i, r))
 			r = r + 1
 	
-		CTkButton(self, text="Save", font=(None,16), command=self.save).grid(row=11, column=0, columnspan=11,pady=10,padx=10,sticky="e")
+		CTkButton(f, text='Reset', command=self.reset_distribution).grid(row=r, column=5, padx=5, pady=5,sticky='we')
+		
+		CTkButton(self, text="Update", font=(None,16), command=self.save).grid(row=11, column=0, columnspan=11,pady=10,padx=10,sticky="e")
 		CTkLabel(self, text="Remember to hit enter key,tab key or change focus by clicking on other cells to update the values.").grid(row=12, column=0, columnspan=11,pady=10,padx=10,sticky="ew")
 		
 		self.warning = CTkLabel(self, text="", bg_color="#222", text_color="#f66")
@@ -157,9 +160,13 @@ class UncertantiesMatrixTop(CTkToplevel):
 		for i in range(0,len(self.parent.index)):
 			self.entries[row-1][i] = self._entry(master, row, i, what)
 
+		'''
 		if what in self.default_values:
+			print(what, self.default_values[what]['cbox'])
 			cb.set(self.default_values[what]['cbox'])
 			self.lock(self.default_values[what]['cbox'], row-1)
+		'''
+		return cb
 
 	def add_cbox(self, master, what, row, column):
 		CTkLabel(master, text="%s:" % what.title(), anchor="e").grid(row=row, column=column, padx=5, pady=5, sticky='we')
@@ -236,35 +243,65 @@ class UncertantiesMatrixTop(CTkToplevel):
 		return 
 
 	def reset_cn(self):
-		self.stuff['list'] = [];
-		TextboxHelper.update_value(self.cn_textbox, "")
-		self.parent.success_msg("Classification noise resetted.")
+
+		EntryHelper.update_value(self.p, None)
+
+		self.c1.deselect()
+		self.c2.deselect()
+
+		for key in self.cbox:
+			for cb in self.cbox[key]:
+				if key != 'cv':
+					cb.set('')
+					self.update_bg_color(cb)
+
+		TextboxHelper.update_value(self.cn_textbox, '')
+
+	def reset_distribution(self):
+		self._update_values(self.parent._empty_cell_matrix())
+
+		self.parent.success_msg("All Reset to default.")
 
 	def reduce(self,array):
 		array = array.split(";")
 		return "%s;%s" % (array[0],array[1])
 
+
+	def update_bg_color(self, c):
+		color = c.get()
+		if color == '':
+			color='#343638'
+		c.configure(fg_color=color, text_color=ColorHelper.getTextColor(color))
+
 	def modify(self, stuff, row, col, multiple=False):
+		self.reset_cn()
+		self.reset_distribution()
+		print(stuff)
 
 		self.stuff = stuff
 		self.row = row
 		self.col = col
 		self.multiple = multiple
 		
-		for i in range(self.stuff['entries'].shape[0]):
-			for j in range (self.stuff['entries'].shape[1]):
-				EntryHelper.update_value(self.entries[i][j], self.stuff['entries'][i][j])
-		
-		TextboxHelper.update_value(self.cn_textbox, '\n'.join(self.stuff['list']))
-		
+		self._update_values(stuff);
+		TextboxHelper.update_value(self.cn_textbox, '\n'.join(stuff['list']))
+
 		self.deiconify()
 		self.focus_force()
 		self.grab_release()
 		self.grab_set()
 		
-		
-	def check(self, row, i, min_value, max_value):
+	def _update_values(self,stuff):
+		for i in range(len(self.cbox['cv'])):
+			self.cbox['cv'][i].set(stuff['cbox'][i])
+			self.lock(stuff['cbox'][i], i)
 
+		for i in range(stuff['entries'].shape[0]):
+			for j in range (stuff['entries'].shape[1]):
+				EntryHelper.update_value(self.entries[i][j], stuff['entries'][i][j])
+
+	def check(self, row, i, min_value, max_value):
+		
 		e = self.entries[row][i]
 		value = e.get().strip()
 		
@@ -336,11 +373,20 @@ class UncertantiesMatrixTop(CTkToplevel):
 	def save(self):
 		matrix = self.stuff['entries']
 
-		for i in range(matrix.shape[0]):
-			for j in range(matrix.shape[1]):
-				self.stuff['entries'][i][j] = self.entries[i][j].get().strip()
+		errors = False
 
-		print(self.stuff)
+		for i in range(matrix.shape[0]):
+			self.stuff['cbox'][i] = self.cbox['cv'][i].get()
+			for j in range(matrix.shape[1]):
+				cell_value = self.entries[i][j].get().strip()
+				self.stuff['entries'][i][j] = cell_value
+				if self.entries[i][j].cget('state') == 'normal' and cell_value == '':
+					errors = True
+
+		if errors:
+			self.parent.error_msg("Warning, All unlocked distribution values must be filled.")
+			return
+
 		self._close()
 		
 	
