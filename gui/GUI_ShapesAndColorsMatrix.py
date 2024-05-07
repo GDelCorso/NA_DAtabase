@@ -175,7 +175,7 @@ class ShapesAndColorsMatrix():
 		try:
 			self.G.save_data()
 		except:
-			msg = "Unable to save p-matrix CSV"
+			msg = "Unable to save shapes_and_colors_matrix.csv"
 			self.error_msg(msg)
 			return False
 			

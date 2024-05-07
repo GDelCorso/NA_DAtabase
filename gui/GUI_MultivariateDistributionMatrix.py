@@ -143,7 +143,7 @@ class MultivariateDistributionMatrix():
 		df = pd.DataFrame(csvdata, index=index, columns=columns)
 		path_data = os.getcwd()
 		path_data = os.path.join(path_data, db_name)
-		filename = os.path.join(path_data, 'shapes_colors_d_matrix.csv')
+		filename = os.path.join(path_data, 'multivariate_distribution_matrix.csv')
 		#print(filename)
 		df.to_csv(filename)
 		return True

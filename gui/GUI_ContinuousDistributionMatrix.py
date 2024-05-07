@@ -178,12 +178,12 @@ class ContinuousDistributionMatrix():
 			csvdata = np.transpose(csvdata)
 			path_data = os.getcwd()
 			path_data = os.path.join(path_data, db_name)
-			filename = os.path.join(path_data, 'shapes_colors_v_matrix.csv')
+			filename = os.path.join(path_data, 'continuous_distribution_matrix.csv')
 			#print(filename)
 			df = pd.DataFrame(csvdata, index=self.index, columns=self.continuous_variables)
 			df.to_csv(filename)
 		except:
-			msg = "Unable to save v-matrix CSV"
+			msg = "Unable to save continuous_distribution_matrix.csv"
 			self.error_msg(msg)
 			return False
 

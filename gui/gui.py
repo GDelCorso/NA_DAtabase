@@ -98,7 +98,7 @@ class App(CTk):
 		self.ShapesAndColorsMatrix.init_G(self.db_name)
 
 	def save(self):
-		if self.ShapesAndColorsMatrix.save(self.db_name) and self.SamplerPropertiesMatrix.save(self.db_name) and self.ContinuousDistributionMatrix.save(self.db_name) and self.MultivariateDistributionMatrix.save(self.db_name):
+		if self.ShapesAndColorsMatrix.save(self.db_name) and self.SamplerPropertiesMatrix.save(self.db_name) and self.ContinuousDistributionMatrix.save(self.db_name) and self.MultivariateDistributionMatrix.save(self.db_name) and self.UncertantiesMatrix.save(self.db_name):
 			self.success_msg("Data saved successfully in folder %s" % self.db_name, True)
 
 	def success_msg(self, msg, alert=False):

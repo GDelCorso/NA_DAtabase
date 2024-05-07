@@ -40,7 +40,8 @@ class UncertantiesMatrixTop(CTkToplevel):
 		# last cell value focused on
 		self._last_value = None
 			
-		
+		self.multiple = False
+
 		self.entries = np.empty((len(self.parent.continuous_variables), len(self.parent.index)), dtype=object)
 
 		self.cbox_lock_values = {
@@ -276,8 +277,7 @@ class UncertantiesMatrixTop(CTkToplevel):
 	def modify(self, stuff, row, col, multiple=False):
 		self.reset_cn()
 		self.reset_distribution()
-		print(stuff)
-
+		
 		self.stuff = stuff
 		self.row = row
 		self.col = col
@@ -299,6 +299,11 @@ class UncertantiesMatrixTop(CTkToplevel):
 		for i in range(stuff['entries'].shape[0]):
 			for j in range (stuff['entries'].shape[1]):
 				EntryHelper.update_value(self.entries[i][j], stuff['entries'][i][j])
+
+		if self.multiple:
+			self.warning.configure(text="Warning, you're editing more multiple matrix at once. Be careful.")
+		else:
+			self.warning.configure(text="")
 
 	def check(self, row, i, min_value, max_value):
 		
@@ -387,8 +392,11 @@ class UncertantiesMatrixTop(CTkToplevel):
 			self.parent.error_msg("Warning, All unlocked distribution values must be filled.")
 			return
 
-		self._close()
+		if self.multiple:
+			self.parent.update_multiple_matrix(self.stuff, self.row, self.col)
 		
+		self.parent.success_msg("Matrix updated successfully.", True)
+		self._close()
 	
 	def _entry(self, master, row, i, what):
 		e = CTkEntry(master, fg_color="#000", justify="center")

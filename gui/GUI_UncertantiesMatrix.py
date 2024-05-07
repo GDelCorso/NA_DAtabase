@@ -53,11 +53,13 @@ class UncertantiesMatrix():
 
 	def edit_selected(self):
 		if len(self._groupToModify) == 1:
-			return self._mou_matrix(self._groupToModify[0]['row'],self._groupToModify[0]['col'])
+			return self._mod_matrix(self._groupToModify[0]['row'],self._groupToModify[0]['col'])
 
+		row = list(map(lambda e: e['row'], self._groupToModify))
+		col = list(map(lambda e: e['col'], self._groupToModify))
+
+		self.UncertantiesMatrixTop.modify(self._empty_cell_matrix(), row, col, True)
 		return
-
-	
 	
 	def new_shape(self, vertices, G):
 		self.G = G
@@ -110,19 +112,14 @@ class UncertantiesMatrix():
 			'entries' : entries
 		}
 
-		EV['entries'][:, 1] = 1
+		EV['entries'][:, 1] = 0
 
 		return EV
 
 
-	def update_matrix(self, matrix, row, col):
-		if type(row) is list:
-			for ci in range(len(row)):
-				for i in range(matrix.shape[0]):
-					for j in range(matrix.shape[1]):
-						self.u_matrix[row[ci]][col[ci]][i][j] = matrix[i][j]
-		else:
-			self.u_matrix[row][col] = matrix.copy()
+	def update_multiple_matrix(self, matrix, row, col):
+		for ci in range(len(row)):
+			self.u_matrix[row[ci]][col[ci]] = matrix
 		self._checked()
 		#print(self.u_matrix)
 		'''
@@ -131,9 +128,40 @@ class UncertantiesMatrix():
 		else:
 			self.parent.error_msg("Warning, the matrix is not positive definite. A random perturbation is going to be applied to ensure a proper Cholesky decomposition.")
 		'''
-	def save(self, db_name):
-		return True
+	def _map_color(self, hex):
+		rgb = str(ColorHelper.hexToRGB(hex))
+		rgb = rgb.replace("(","")
+		rgb = rgb.replace(")","")
+		rgb = rgb.replace(",","-")
+		rgb = rgb.replace(" ","")
+		return rgb
 
+	def save(self, db_name):
+		colors = list(map(self._map_color, self.G.color_order))
+		
+		for ci in range(self.u_matrix.shape[0]):
+			for si in range(self.u_matrix.shape[1]):
+				filename = "uncertanties_distribution_matrix_%s_%s.csv" % ( self.G.shape_order[si], colors[ci])
+				print(filename)
+
+		'''
+		try:
+			csvdata = [[e.get().replace(self.infinity, "inf") for e in sub] for sub in self.entries]
+			csvdata = np.transpose(csvdata)
+			path_data = os.getcwd()
+			path_data = os.path.join(path_data, db_name)
+
+			filename = os.path.join(path_data, 'uncertanties_distribution_matrix.csv')
+			#print(filename)
+			df = pd.DataFrame(csvdata, index=self.index, columns=self.continuous_variables)
+			df.to_csv(filename)
+		except:
+			msg = "Unable to save continuous_distribution_matrix.csv"
+			self.error_msg(msg)
+			return False
+		'''
+		return True
+		
 	def _add_cells(self,what):
 		'''
 		Add a row/column of cells
@@ -174,7 +202,7 @@ class UncertantiesMatrix():
 		'''
 		inner_f= CTkFrame(self.f)
 		inner_f.grid(row=row,column=col)
-		CTkButton(inner_f, text="m", width=1, command=lambda: self._mou_matrix(row-1, col-1)).grid(row=0, column=0, padx=1)
+		CTkButton(inner_f, text="m", width=1, command=lambda: self._mod_matrix(row-1, col-1)).grid(row=0, column=0, padx=1)
 		cb =CTkCheckBox(inner_f, text="",width=1, command=self._checked)
 		cb.grid(row=0, column=1, padx=1)
 		return cb
@@ -190,7 +218,7 @@ class UncertantiesMatrix():
 		self.edit.configure(state="normal" if len(self._groupToModify) else "disabled")
 		return
 
-	def _mou_matrix(self, row, col):
-		self.UncertantiesMatrixTop.modify(self.u_matrix[row][col].copy(), row, col)
+	def _mod_matrix(self, row, col):
+		self.UncertantiesMatrixTop.modify(self.u_matrix[row][col], row, col)
 		
 

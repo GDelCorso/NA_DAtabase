@@ -365,7 +365,7 @@ class GUI_ShapesAndColorsMatrix_interface:
 
     def get_save_date_path(self):
         return os.path.join(self.get_save_folder(),\
-                                            'shapes_colors_ShapesAndColorsMatrix.csv')
+                                            'shapes_and_colors_matrix.csv')
 
     def get_save_folder(self):
         path_data = os.getcwd()
