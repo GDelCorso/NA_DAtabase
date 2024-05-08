@@ -72,4 +72,32 @@ class CellHelper():
 			state = new_state, 
 			fg_color = color 
 		)
-		
+
+class ContinuousVariableHelper():
+	index = [
+		'lower_bound', 
+		'mean', 
+		'sigma', 
+		'upper_bound'
+	]
+
+	infinity = "∞"
+
+	cbox_lock_values = {
+		'constant' : ['lower_bound', 'sigma', 'upper_bound'],
+		'uniform': ['mean', 'sigma'],
+		'gaussian': ['lower_bound', 'upper_bound'],
+		'truncated_gaussian': []
+	}
+
+	def title(txt):
+		return txt.title().replace("_", " ")
+
+	def P_INF():
+		return '+%s' % ContinuousVariableHelper.infinity
+	
+	def N_INF():
+		return '-%s' % ContinuousVariableHelper.infinity
+				
+
+

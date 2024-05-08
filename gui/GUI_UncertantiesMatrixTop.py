@@ -32,25 +32,17 @@ class UncertantiesMatrixTop(CTkToplevel):
 			'cv': []
 		}
 
+		self._coords = (0, 0)
+		
 		self.title("Uncertanties")
 		self.protocol("WM_DELETE_WINDOW", self._close)
-
-		self.infinity = "∞"
 
 		# last cell value focused on
 		self._last_value = None
 			
 		self.multiple = False
 
-		self.entries = np.empty((len(self.parent.continuous_variables), len(self.parent.index)), dtype=object)
-
-		self.cbox_lock_values = {
-			'constant' : ['lower_bound', 'sigma', 'upper_bound'],
-			'uniform': ['mean', 'sigma'],
-			'gaussian': ['lower_bound', 'upper_bound'],
-			'truncated_gaussian': []
-		}
-
+		self.entries = np.empty((len(self.parent.continuous_variables), len(ContinuousVariableHelper.index)), dtype=object)
 
 		self.default_values = {
 			'deformation': {
@@ -131,8 +123,8 @@ class UncertantiesMatrixTop(CTkToplevel):
 		f.grid(row=1, column=0, pady=10, rowspan=2, sticky="nswe")
 
 		c=2
-		for i in self.parent.index:
-			CTkLabel(f, text=i.title().replace("_", " ")).grid(row=0, column=c, padx=5, pady=5, sticky='we')
+		for i in ContinuousVariableHelper.index:
+			CTkLabel(f, text=ContinuousVariableHelper.title(i)).grid(row=0, column=c, padx=5, pady=5, sticky='we')
 			c = c + 1
 		
 		r=1
@@ -140,6 +132,11 @@ class UncertantiesMatrixTop(CTkToplevel):
 			self.cbox['cv'].append(self.add_row(f, i, r))
 			r = r + 1
 	
+		CTkButton(f, text='-%s' % ContinuousVariableHelper.infinity, command=self._add_negative_inf).grid(row=r, column=2, padx=5, pady=5,sticky='we')
+		
+		CTkButton(f, text='+%s' % ContinuousVariableHelper.infinity, command=self._add_positive_inf).grid(row=r, column=5, padx=5, pady=5,sticky='we')
+		
+		r = r + 1
 		CTkButton(f, text='Reset', command=self.reset_distribution).grid(row=r, column=5, padx=5, pady=5,sticky='we')
 		
 		CTkButton(self, text="Update", font=(None,16), command=self.save).grid(row=11, column=0, columnspan=11,pady=10,padx=10,sticky="e")
@@ -148,17 +145,27 @@ class UncertantiesMatrixTop(CTkToplevel):
 		self.warning = CTkLabel(self, text="", bg_color="#222", text_color="#f66")
 		self.warning.grid(row=13, column=0, columnspan=11,pady=10,padx=10,sticky="ew")
 
+	def _add_negative_inf(self):
+		x,y = self._coords
+		EntryHelper.update_value(self.entries[x][y], '-%s' % ContinuousVariableHelper.infinity)
+		return;
+	
+	def _add_positive_inf(self):
+		x,y = self._coords
+		EntryHelper.update_value(self.entries[x][y], '+%s' % ContinuousVariableHelper.infinity)
+		return;
+
 	def _close(self):
 		self.grab_release()
 		self.withdraw()
 	
 	def add_row(self, master, what, row):
-		CTkLabel(master, text='%s:' % what.title().replace("_", " "), anchor="e").grid(row=row, column=0, padx=5, pady=5, sticky='we')
-		values = list(self.cbox_lock_values.keys())
+		CTkLabel(master, text='%s:' % ContinuousVariableHelper.title(what), anchor="e").grid(row=row, column=0, padx=5, pady=5, sticky='we')
+		values = list(ContinuousVariableHelper.cbox_lock_values.keys())
 		cb = CTkComboBox(master, values=values, state="readonly", command=lambda v:self.lock(v, row-1))
 		cb.grid(row=row, column=1, padx=5, sticky='we')
 		
-		for i in range(0,len(self.parent.index)):
+		for i in range(0,len(ContinuousVariableHelper.index)):
 			self.entries[row-1][i] = self._entry(master, row, i, what)
 
 		'''
@@ -313,14 +320,14 @@ class UncertantiesMatrixTop(CTkToplevel):
 		if len(value) == 0:
 			return
 		
-		if i==0 and value == "-%s" % self.infinity:
+		if i==0 and value == "-%s" % ContinuousVariableHelper.infinity:
 			return
 
-		if i==3 and value == "+%s" % self.infinity:
+		if i==3 and value == "+%s" % ContinuousVariableHelper.infinity:
 			return
 
-		if i==0 and value == "+%s" % self.infinity or i==3 and value == "-%s" % self.infinity:
-			self.parent.error_msg("Error: %s can't be %s." % (self.parent.index[i], value))
+		if i==0 and value == "+%s" % ContinuousVariableHelper.infinity or i==3 and value == "-%s" % ContinuousVariableHelper.infinity:
+			self.parent.error_msg("Error: %s can't be %s." % (ContinuousVariableHelper.index[i], value))
 			EntryHelper.update_value(e,self._last_value)
 			return
 
@@ -328,12 +335,12 @@ class UncertantiesMatrixTop(CTkToplevel):
 			value = float(value)
 			
 			if value < min_value:
-				self.parent.error_msg("Error: %s must be greater than %s." % (self.parent.index[i], str(min_value)))
+				self.parent.error_msg("Error: %s must be greater than %s." % (ContinuousVariableHelper.title(ContinuousVariableHelper.index[i]), str(min_value)))
 				EntryHelper.update_value(e,self._last_value)
 				return
 		
 			if value > max_value:
-				self.parent.error_msg("Error: %s must be lower than %s." % (self.parent.index[i], str(max_value)))
+				self.parent.error_msg("Error: %s must be lower than %s." % (ContinuousVariableHelper.title(ContinuousVariableHelper.index[i]), str(max_value)))
 				EntryHelper.update_value(e,self._last_value)
 				return
 
@@ -344,31 +351,31 @@ class UncertantiesMatrixTop(CTkToplevel):
 			u_value = u.get().strip()
 
 			if i==2 and value <= 0:
-				self.parent.error_msg("Error: %s must be greater than zero." % self.parent.index[i])
+				self.parent.error_msg("Error: %s must be greater than zero." % ContinuousVariableHelper.title(ContinuousVariableHelper.index[i]))
 				EntryHelper.update_value(e,self._last_value)
 				return
 			
 			if len(l_value) > 0 and len(u_value) > 0:
 				if float(l_value) >= float(u_value):
-					self.parent.error_msg("Error: %s must be greater than %s." % (self.parent.index[3],self.parent.index[0]))
+					self.parent.error_msg("Error: %s must be greater than %s." % (ContinuousVariableHelper.title(ContinuousVariableHelper.index[3]),ContinuousVariableHelper.title(ContinuousVariableHelper.index[0])))
 					EntryHelper.update_value(e,self._last_value)
 					return False
 
-			self.parent.success_msg("%s inserted successfully." % self.parent.index[i])
+			self.parent.success_msg("%s inserted successfully." % ContinuousVariableHelper.title(ContinuousVariableHelper.index[i]))
 			return True
 		except ValueError:
-			self.parent.error_msg("Error: %s must be a numeric value." % self.parent.index[i])
+			self.parent.error_msg("Error: %s must be a numeric value." % ContinuousVariableHelper.title(ContinuousVariableHelper.index[i]))
 			EntryHelper.update_value(e,self._last_value)
 			return False
 
 
 
 	def lock(self,v, r):
-		to_locked = self.cbox_lock_values[v]
-		for i in range(0,len(self.parent.index)):
+		to_locked = ContinuousVariableHelper.cbox_lock_values[v]
+		for i in range(0,len(ContinuousVariableHelper.index)):
 			s = IntVar()
 			cell = self.entries[r][i]
-			if self.parent.index[i] in to_locked:
+			if ContinuousVariableHelper.index[i] in to_locked:
 				s.set(1)
 			else:
 				s.set(0)
@@ -392,25 +399,33 @@ class UncertantiesMatrixTop(CTkToplevel):
 			self.parent.error_msg("Warning, All unlocked distribution values must be filled.")
 			return
 
+		min_value = 0
+		max_value = 100
+
+		i,j = self._coords
+		e = self.entries[i][j]
+		if e.cget('state') == 'normal' and self.check(i,j,min_value,max_value) == False:
+			return
+
 		if self.multiple:
 			self.parent.update_multiple_matrix(self.stuff, self.row, self.col)
 		
-		self.parent.success_msg("Matrix updated successfully.", True)
+		self.parent.success_msg("Matrix updated successfully.")
 		self._close()
 	
 	def _entry(self, master, row, i, what):
 		e = CTkEntry(master, fg_color="#000", justify="center")
-		e.bind('<FocusIn>', lambda evt: self._set_last_value(e.get()))
+		e.bind('<FocusIn>', lambda evt: self._set_last_value(e.get(),row-1, i))
 		e.grid(row=row, column=i+2, padx=5, sticky='we')
 		if i == 0:
-			EntryHelper.update_value(e,"-%s" % self.infinity)
+			EntryHelper.update_value(e,"-%s" % ContinuousVariableHelper.infinity)
 		if i == 3:
-			EntryHelper.update_value(e,"+%s" % self.infinity)
+			EntryHelper.update_value(e,"+%s" % ContinuousVariableHelper.infinity)
 
 		if what in self.default_values:
-			if self.parent.index[i] in self.default_values[what]:
-				#f_value = 0 if self.default_values[what][self.parent.index[i]] == 0 else "%.2f" % self.default_values[what][self.parent.index[i]]
-				f_value = self.default_values[what][self.parent.index[i]]
+			if ContinuousVariableHelper.index[i] in self.default_values[what]:
+				#f_value = 0 if self.default_values[what][ContinuousVariableHelper.index[i]] == 0 else "%.2f" % self.default_values[what][ContinuousVariableHelper.index[i]]
+				f_value = self.default_values[what][ContinuousVariableHelper.index[i]]
 				EntryHelper.update_value(e, f_value)
 
 		min_value = 0
@@ -419,9 +434,10 @@ class UncertantiesMatrixTop(CTkToplevel):
 		CellHelper.bind_cell(e, lambda evt: self.check(row-1,i, min_value, max_value))
 		return e	
 
-	def _set_last_value(self, value):
+	def _set_last_value(self, value, row, col):
 		self._last_value = value
-
+		self._coords = (row,col)
+		
 	def update(self, G):
 		for s in self.cbox['shape']:
 			s.configure(values=[''] + G.shape_order)

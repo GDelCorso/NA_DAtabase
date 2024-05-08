@@ -22,13 +22,6 @@ class UncertantiesMatrix():
 		'multiplicative_noise_regression'
 	]
 
-	index = [
-		'lower_bound', 
-		'mean', 
-		'sigma', 
-		'upper_bound'
-	]
-
 	oob = -2
 
 	def __init__(self, tab, error_msg, success_msg):
@@ -39,6 +32,8 @@ class UncertantiesMatrix():
 		self.u_matrix = np.empty((0,0), dtype=object)
 		self.cells = np.array([[]])
 		
+		
+
 		self.UncertantiesMatrixTop = UncertantiesMatrixTop(self)
 		self.UncertantiesMatrixTop.withdraw()
 
@@ -103,7 +98,7 @@ class UncertantiesMatrix():
 		return
 		
 	def _empty_cell_matrix(self):
-		entries = np.empty((len(self.continuous_variables), len(self.index)), dtype=object)
+		entries = np.empty((len(self.continuous_variables), len(ContinuousVariableHelper.index)), dtype=object)
 		entries.fill('')
 		
 		EV = {
@@ -119,7 +114,7 @@ class UncertantiesMatrix():
 
 	def update_multiple_matrix(self, matrix, row, col):
 		for ci in range(len(row)):
-			self.u_matrix[row[ci]][col[ci]] = matrix
+			self.u_matrix[row[ci]][col[ci]] = matrix.copy()
 		self._checked()
 		#print(self.u_matrix)
 		'''
@@ -137,29 +132,57 @@ class UncertantiesMatrix():
 		return rgb
 
 	def save(self, db_name):
-		colors = list(map(self._map_color, self.G.color_order))
+		try:
+			colors = list(map(self._map_color, self.G.color_order))
+		except:
+			return True
 		
 		for ci in range(self.u_matrix.shape[0]):
 			for si in range(self.u_matrix.shape[1]):
+				
+				entries = self.u_matrix[ci][si]['entries'].copy()
+				
+				csvdata = [[str(e).replace(ContinuousVariableHelper.infinity, "inf") for e in sub] for sub in entries]
+				csvdata = np.transpose(csvdata)
+				
+				path_data = os.getcwd()
+				path_data = os.path.join(path_data, db_name)
+				
 				filename = "uncertanties_distribution_matrix_%s_%s.csv" % ( self.G.shape_order[si], colors[ci])
-				print(filename)
+				filename = os.path.join(path_data, filename)
+				
+				try:
+					pd.DataFrame(csvdata, index=ContinuousVariableHelper.index, columns=self.continuous_variables).to_csv(filename)
+				except:
+					msg = "Unable to write %s" % os.path.basename(filename)
+					self.error_msg(msg)
+					return False	
 
-		'''
-		try:
-			csvdata = [[e.get().replace(self.infinity, "inf") for e in sub] for sub in self.entries]
-			csvdata = np.transpose(csvdata)
-			path_data = os.getcwd()
-			path_data = os.path.join(path_data, db_name)
+				list_cn = self.u_matrix[ci][si]['list']
+				
+				rows = len(list_cn)
+				if rows > 0:
+					csvdata = np.empty((rows,1), dtype=object)
+					csvdata[0][0] = list_cn[0] if len(list_cn) else None
 
-			filename = os.path.join(path_data, 'uncertanties_distribution_matrix.csv')
-			#print(filename)
-			df = pd.DataFrame(csvdata, index=self.index, columns=self.continuous_variables)
-			df.to_csv(filename)
-		except:
-			msg = "Unable to save continuous_distribution_matrix.csv"
-			self.error_msg(msg)
-			return False
-		'''
+					for row in range(1,len(list_cn)):
+						csvdata[row][0] = list_cn[row] if row < len(list_cn) else None
+				else:
+					csvdata = []
+
+				path_data = os.getcwd()
+				path_data = os.path.join(path_data, db_name)
+				
+				filename = "uncertanties_classification_noise_%s_%s.csv" % ( self.G.shape_order[si], colors[ci])
+				filename = os.path.join(path_data, filename)
+				
+				try:
+					pd.DataFrame(csvdata, columns=['classification_noise']).to_csv(filename, index=False)	
+				except:
+					msg = "Unable to write %s" % os.path.basename(filename)
+					self.error_msg(msg)
+					return False	
+
 		return True
 		
 	def _add_cells(self,what):
