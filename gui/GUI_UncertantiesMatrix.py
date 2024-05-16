@@ -123,6 +123,9 @@ class UncertantiesMatrix():
 		else:
 			self.parent.error_msg("Warning, the matrix is not positive definite. A random perturbation is going to be applied to ensure a proper Cholesky decomposition.")
 		'''
+	
+	
+
 	def _map_color(self, hex):
 		rgb = str(ColorHelper.hexToRGB(hex))
 		rgb = rgb.replace("(","")

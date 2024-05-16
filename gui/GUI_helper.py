@@ -74,6 +74,8 @@ class CellHelper():
 		)
 
 class ContinuousVariableHelper():
+
+	# columns label-
 	index = [
 		'lower_bound', 
 		'mean', 
@@ -81,8 +83,11 @@ class ContinuousVariableHelper():
 		'upper_bound'
 	]
 
+	# infinity symbol
 	infinity = "∞"
 
+	# set which column should be locked
+	# depending on the type of distribution 
 	cbox_lock_values = {
 		'constant' : ['lower_bound', 'sigma', 'upper_bound'],
 		'uniform': ['mean', 'sigma'],
@@ -91,12 +96,16 @@ class ContinuousVariableHelper():
 	}
 
 	def title(txt):
+		# transform text replacing undescore with spaces
+		# and uppercase every word
 		return txt.title().replace("_", " ")
 
 	def P_INF():
+		# return positive infinite value as string
 		return '+%s' % ContinuousVariableHelper.infinity
 	
 	def N_INF():
+		# return negative infinite value as string
 		return '-%s' % ContinuousVariableHelper.infinity
 				
 

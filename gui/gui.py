@@ -19,7 +19,13 @@ from GUI_ContinuousDistributionMatrix import *
 from GUI_MultivariateDistributionMatrix import *
 
 class App(CTk):
+	'''
+	Main App Class
 
+	This class build the entire gui
+	'''
+
+	# Shotr description for every tab
 	tabview_info = {
 		'Shapes and Colors': "Provides the probability of each color/shape combination.\n\nP value (row on the left): Cumulative probability of the color among different shapes. If changed, it will update all unlocked cells corresponding to this color.\nP value (column on the top): Cumulative probability of the shape among different colors. If changed, it will update all unlocked cells corresponding to this shape.\nLock/Unlock symbol: Lock/unlock the cell/row/column value to prevent the probability from being updated automatically.\nReset p-matrix: Unlock all cells and sample each shape/color combination with equal probability",
 		'Sampler Properties': "Contains the properties of the dataset and optionally the addresses for classification ground truth.\n\nCorrect classes:  [Facultative] Choose a correct class for classification (colors and/or shapes).\nAllow out of border: Allow for production of shapes with center into the image and radii eventually out of borders. If enabled the only sampling strategy allowed is MC.",
@@ -30,9 +36,9 @@ class App(CTk):
 
 	def __init__(self):
 		super().__init__()
-		# self.withdraw()
-		'''
-		initialize the window		'''
+		
+		# initialize the window		
+		
 		self.titleString = "NA Database Configurator"
 		self.title(self.titleString)
 		self.geometry("1200x640")
@@ -44,14 +50,17 @@ class App(CTk):
 		
 		bf.grid_columnconfigure(2, weight=1)
 		
+		# add button to show tab info
 		CTkButton(bf, text='Tab info', command=self.info, width=1).grid(row=0, column=0, pady=10, padx=5)
 		
+		# add button to save all csv files
 		self.save = CTkButton(bf, text='Save Database', command=self.save)
 		self.save.grid(row=0, column=1, pady=10)
 		
 		self.message_box = CTkLabel(bf, bg_color="#222", anchor="w", text="")
 		self.message_box.grid(row=0, column=2, padx=10, sticky="ew")
 		
+		# create the tab view
 		self.tabview = CTkTabview(master=self)
 		self.tabview.add("Shapes and Colors")
 		self.tabview.add("Sampler Properties")
@@ -60,19 +69,24 @@ class App(CTk):
 		self.tabview.add("Multivariate distribution")
 		self.tabview.grid(row=1, column=0, padx=10, pady=5, sticky="nswe")
 
-		self.SamplerPropertiesMatrix = SamplerPropertiesMatrix(self.tabview.tab('Sampler Properties'), self.error_msg, self.success_msg)
-		self.MultivariateDistributionMatrix = MultivariateDistributionMatrix(self.tabview.tab('Multivariate distribution'), self.error_msg, self.success_msg)
-		self.UncertantiesMatrix = UncertantiesMatrix(self.tabview.tab('Uncertanties'), self.error_msg, self.success_msg)
-		self.ShapesAndColorsMatrix = ShapesAndColorsMatrix(self.tabview.tab('Shapes and Colors'), self.error_msg, self.success_msg, self.SamplerPropertiesMatrix, self.MultivariateDistributionMatrix, self.UncertantiesMatrix)
-		self.ContinuousDistributionMatrix = ContinuousDistributionMatrix(self.tabview.tab('Continuous distribution'), self.error_msg, self.success_msg)
+		# add contents for every tab
 		
-		#ask for db name 
+		self.SamplerPropertiesMatrix = SamplerPropertiesMatrix(self.tabview.tab('Sampler Properties'), self.error_msg, self.success_msg)
+		self.UncertantiesMatrix = UncertantiesMatrix(self.tabview.tab('Uncertanties'), self.error_msg, self.success_msg)
+		self.ContinuousDistributionMatrix = ContinuousDistributionMatrix(self.tabview.tab('Continuous distribution'), self.error_msg, self.success_msg)
+		self.MultivariateDistributionMatrix = MultivariateDistributionMatrix(self.tabview.tab('Multivariate distribution'), self.error_msg, self.success_msg)
+		self.ShapesAndColorsMatrix = ShapesAndColorsMatrix(self.tabview.tab('Shapes and Colors'), self.error_msg, self.success_msg, self.SamplerPropertiesMatrix, self.MultivariateDistributionMatrix, self.UncertantiesMatrix)
+		
+		# ask for db name 
 		self.ask_db_name()
-		# shows choose-preset window
+		# TODO: shows choose-preset window
 		# self.PresetWindow = PresetWindow(self)
 		self.mainloop()
 
 	def info(self):
+		'''
+		pops up an info Message box containing info about the active tab
+		'''
 		self.info_msg(msg = "%s - %s" % (self.tabview.get(), self.tabview_info[self.tabview.get()]))
 		return
 
@@ -97,12 +111,19 @@ class App(CTk):
 		self.ShapesAndColorsMatrix.init_G(self.db_name)
 
 	def save(self):
-		if self.ShapesAndColorsMatrix.save(self.db_name) and self.SamplerPropertiesMatrix.save(self.db_name) and self.ContinuousDistributionMatrix.save(self.db_name) and self.MultivariateDistributionMatrix.save(self.db_name) and self.UncertantiesMatrix.save(self.db_name):
+		'''
+		save all csv data
+		'''
+		if self.ShapesAndColorsMatrix.save(self.db_name) and \
+			self.SamplerPropertiesMatrix.save(self.db_name) and \
+			self.ContinuousDistributionMatrix.save(self.db_name) and \
+			self.MultivariateDistributionMatrix.save(self.db_name) and \
+			self.UncertantiesMatrix.save(self.db_name):
 			self.success_msg("Data saved successfully in folder %s" % self.db_name, True)
 
 	def success_msg(self, msg, alert=False):
 		'''
-		write a success message on message box
+		show a success message on message box
 		''' 
 		self.message_box.configure(text=msg, text_color="#6f6")
 		if(alert):
@@ -111,7 +132,7 @@ class App(CTk):
 
 	def error_msg(self, msg, alert = True):
 		'''
-		write an error message on message box
+		show an error message on message box
 		'''
 		self.message_box.configure(text=msg, text_color="#f66")
 		if(alert):
@@ -119,9 +140,12 @@ class App(CTk):
 			#tkmb.showinfo(title='Error', message=msg, icon='error')
 	
 	def info_msg(self, msg):
+		'''
+		show an info message on message box
+		'''
 		CTkMessagebox(title="Info", message=msg, icon="info", width=600)
 		#tkmb.showinfo(title='Info', message=msg, icon='info')
 	
-
-set_appearance_mode("dark")  # Modes: system (default), light, dark
+# set the dark mode
+set_appearance_mode("dark")  
 app = App()

@@ -12,6 +12,9 @@ from customtkinter import *
 from GUI_helper import *
 
 class ContinuousDistributionMatrix():
+	'''
+	This matrix 
+	'''
 	continuous_variables = [
 		'centre_x',
 		'centre_y',
