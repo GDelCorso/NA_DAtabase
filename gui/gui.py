@@ -9,7 +9,7 @@ from customtkinter import *
 from CTkMessagebox import CTkMessagebox
 import tkinter.messagebox as tkmb
 
-#internal import-1-1
+#internal import 
 from GUI_helper import *
 from GUI_preset import *
 from GUI_ShapesAndColorsMatrix import *
@@ -25,7 +25,7 @@ class App(CTk):
 	This class build the entire gui
 	'''
 
-	# Shotr description for every tab
+	# Short description for each tab
 	tabview_info = {
 		'Shapes and Colors': "Provides the probability of each color/shape combination.\n\nP value (row on the left): Cumulative probability of the color among different shapes. If changed, it will update all unlocked cells corresponding to this color.\nP value (column on the top): Cumulative probability of the shape among different colors. If changed, it will update all unlocked cells corresponding to this shape.\nLock/Unlock symbol: Lock/unlock the cell/row/column value to prevent the probability from being updated automatically.\nReset p-matrix: Unlock all cells and sample each shape/color combination with equal probability",
 		'Sampler Properties': "Contains the properties of the dataset and optionally the addresses for classification ground truth.\n\nCorrect classes:  [Facultative] Choose a correct class for classification (colors and/or shapes).\nAllow out of border: Allow for production of shapes with center into the image and radii eventually out of borders. If enabled the only sampling strategy allowed is MC.",
@@ -119,7 +119,7 @@ class App(CTk):
 			self.ContinuousDistributionMatrix.save(self.db_name) and \
 			self.MultivariateDistributionMatrix.save(self.db_name) and \
 			self.UncertantiesMatrix.save(self.db_name):
-			self.success_msg("Data saved successfully in folder %s" % self.db_name, True)
+			self.success_msg("Data successfully saved in folder %s" % self.db_name, True)
 
 	def success_msg(self, msg, alert=False):
 		'''

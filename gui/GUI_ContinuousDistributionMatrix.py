@@ -27,7 +27,7 @@ class ContinuousDistributionMatrix():
 		self.error_msg = error_msg
 		self.success_msg = success_msg
 
-		# last cell value focused on
+		# variables storing last value and last position
 		self._last_value = None
 		self._coords = (0, 0)
 			

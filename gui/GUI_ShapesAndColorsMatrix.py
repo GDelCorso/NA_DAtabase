@@ -199,12 +199,11 @@ class ShapesAndColorsMatrix():
 				CellHelper.lock_cell(self.cells[i][j]['e'], self.cells[i][j]['s'])
 
 		self._refresh_values()
-		#self.shapes[0]['s'].focus_set()
 		self._set_last_value(self.shapes[0]['p'].get())
 
 	def lock_shape(self, vertices):
 		'''
-		lock/unlick a shape column data
+		lock/unlock a shape column data
 		'''
 		if self._empty():
 			return

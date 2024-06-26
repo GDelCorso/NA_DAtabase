@@ -100,13 +100,15 @@ class ContinuousVariableHelper():
 		# and uppercase every word
 		return txt.title().replace("_", " ")
 
-	def P_INF():
+	@classmethod
+	def P_INF(cls):
 		# return positive infinite value as string
-		return '+%s' % ContinuousVariableHelper.infinity
+		return '+%s' % cls.infinity
 	
-	def N_INF():
+	@classmethod
+	def N_INF(cls):
 		# return negative infinite value as string
-		return '-%s' % ContinuousVariableHelper.infinity
+		return '-%s' % cls.infinity
 				
 
 
