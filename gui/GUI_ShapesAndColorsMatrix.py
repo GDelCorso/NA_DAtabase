@@ -59,7 +59,11 @@ class ShapesAndColorsMatrix():
 		'''
 		dialog = CTkInputDialog(title="Add Shape",text="Enter Vertices (0=circle):")
 		vertices = dialog.get_input();
-		if vertices is not None and vertices.isdigit() and (int(vertices) == 0 or int(vertices) >= 3):
+		self.focus_force()
+		
+		if vertices == None:
+			return
+		if vertices.isdigit() and (int(vertices) == 0 or int(vertices) >= 3):
 			if vertices in self.G.shape_order:
 				# if shape already created before then raise error
 				msg = "shape with %s vertices" % vertices if int(vertices) > 2 else "circle"
@@ -120,6 +124,8 @@ class ShapesAndColorsMatrix():
 		Add a color in the gui
 		'''
 		color_picked = GUI_MyColorPicker().get() # get the color string
+		self.focus_force()
+		
 		if(color_picked is None):
 			return
 		if color_picked in self.G.color_order:

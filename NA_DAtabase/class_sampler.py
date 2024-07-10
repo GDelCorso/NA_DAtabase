@@ -1114,8 +1114,9 @@ class Shape:
         self._shape_canvas = PIL_Drawing(canvas_side, canvas_side)
 
         # 
-        # if the number of sides equals zero
-        # the shape is a circle, else a polygon
+        # if single side shape,
+        # the shape is a circle, else a polygon 
+        # (sides MUST BE 1 or >2)
         # 
         if self._sides == 1:
             self._shape_canvas.circle(
