@@ -12,13 +12,9 @@ from GUI_helper import *
 from GUI_MyColorPicker import *
 
 class ShapesAndColorsMatrix():
-	def __init__(self, tab, error_msg, success_msg, SamplerPropertiesMatrix, MultivariateDistributionMatrix, UncertantiesMatrix):
-		self.error_msg = error_msg
-		self.success_msg = success_msg
-		# dependency injection
-		self.SamplerPropertiesMatrix = SamplerPropertiesMatrix
-		self.MultivariateDistributionMatrix = MultivariateDistributionMatrix
-		self.UncertantiesMatrix = UncertantiesMatrix
+	def __init__(self, parent):
+		self.parent = parent
+
 		# list of shape's p cells
 		self.shapes = []
 		# list of color's p cells
@@ -32,6 +28,7 @@ class ShapesAndColorsMatrix():
 		'''
 		The top frame with buttons and message box
 		'''
+		tab = parent.tabview.tab('Shapes and Colors')
 		bf = CTkFrame(tab)
 		bf.grid(row=0, column=0, pady=10, sticky="we")
 		self.undo = CTkButton(bf, text='Undo', width=1, command=self.do_undo, state="disabled")
@@ -59,7 +56,7 @@ class ShapesAndColorsMatrix():
 		'''
 		dialog = CTkInputDialog(title="Add Shape",text="Enter Vertices (0=circle):")
 		vertices = dialog.get_input();
-		self.focus_force()
+		self.parent.focus_force()
 		
 		if vertices == None:
 			return
@@ -67,7 +64,7 @@ class ShapesAndColorsMatrix():
 			if vertices in self.G.shape_order:
 				# if shape already created before then raise error
 				msg = "shape with %s vertices" % vertices if int(vertices) > 2 else "circle"
-				self.error_msg("Error: "+msg+" already present.")
+				self.parent.error_msg("Error: "+msg+" already present.")
 				return
 			
 			# create the frame
@@ -100,15 +97,15 @@ class ShapesAndColorsMatrix():
 			})
 			# add shape in GUI_interface
 			self.G.new_shape(vertices)
-			self.MultivariateDistributionMatrix.new_shape(vertices, self.G)
-			self.UncertantiesMatrix.new_shape(vertices, self.G)
+			self.parent.MultivariateDistributionMatrix.new_shape(vertices, self.G)
+			self.parent.UncertantiesMatrix.new_shape(vertices, self.G)
 			
 			# place the frame in the gui
 			sf.grid(row=0, column=len(self.G.shape_order))
 
 			# write success message
 			msg = "Shape with %s vertices added successfully." % vertices if int(vertices) > 2 else "Circle added successfully."
-			self.success_msg(msg)
+			self.parent.success_msg(msg)
 
 			
 			# add shape cells fro editing
@@ -116,7 +113,7 @@ class ShapesAndColorsMatrix():
 			return
 
 		# If vertices is not numeric or _empty raisie error
-		self.error_msg("Error: vertices must be 0 for a circle or a number greater than 2.")
+		self.parent.error_msg("Error: vertices must be 0 for a circle or a number greater than 2.")
 		return
 	
 	def add_color(self):
@@ -124,12 +121,12 @@ class ShapesAndColorsMatrix():
 		Add a color in the gui
 		'''
 		color_picked = GUI_MyColorPicker().get() # get the color string
-		self.focus_force()
+		self.parent.focus_force()
 		
 		if(color_picked is None):
 			return
 		if color_picked in self.G.color_order:
-			self.error_msg("Error: color %s already present." % color_picked)
+			self.parent.error_msg("Error: color %s already present." % color_picked)
 			return
 		
 		# create the frame
@@ -159,8 +156,8 @@ class ShapesAndColorsMatrix():
 		})
 		# add color in GUI_interface
 		self.G.new_color(color_picked)
-		self.MultivariateDistributionMatrix.new_color(color_picked, self.G)
-		self.UncertantiesMatrix.new_color(color_picked, self.G)
+		self.parent.MultivariateDistributionMatrix.new_color(color_picked, self.G)
+		self.parent.UncertantiesMatrix.new_color(color_picked, self.G)
 			
 		# place the frame in the gui
 		cf.grid(row=len(self.G.color_order), column=0)
@@ -168,7 +165,7 @@ class ShapesAndColorsMatrix():
 			
 		# write success message
 		msg = "Color %s added successfully." % color_picked
-		self.success_msg(msg)
+		self.parent.success_msg(msg)
 		
 		# add shape cells fro editing
 		self._add_cells('color')
@@ -182,7 +179,7 @@ class ShapesAndColorsMatrix():
 			self.G.save_data()
 		except:
 			msg = "Unable to save shapes_and_colors_matrix.csv"
-			self.error_msg(msg)
+			self.parent.error_msg(msg)
 			return False
 			
 		return True
@@ -318,7 +315,7 @@ class ShapesAndColorsMatrix():
 			# only float accepted
 			value = float(e.get())
 		except:
-			self.error_msg("Error: p values must be numeric (float number with dot instead of comma).")
+			self.parent.error_msg("Error: p values must be numeric (float number with dot instead of comma).")
 			EntryHelper.update_value(e, self._last_value)
 			return
 		if self._last_value is None or value == self._last_value:
@@ -400,6 +397,6 @@ class ShapesAndColorsMatrix():
 		print (self.G.probability_matrix)	
 
 		#update other matrix
-		self.SamplerPropertiesMatrix.update(self.G)
-		self.MultivariateDistributionMatrix.update(self.G)
-		self.UncertantiesMatrix.update(self.G)
+		self.parent.SamplerPropertiesMatrix.update(self.G)
+		self.parent.MultivariateDistributionMatrix.update(self.G)
+		self.parent.UncertantiesMatrix.update(self.G)

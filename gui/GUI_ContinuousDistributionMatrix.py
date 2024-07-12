@@ -22,11 +22,9 @@ class ContinuousDistributionMatrix():
 		'rotation_(degrees)'
 	]
 
-	def __init__(self, tab, error_msg, success_msg):
-		# callcack di
-		self.error_msg = error_msg
-		self.success_msg = success_msg
-
+	def __init__(self, parent):
+		self.parent = parent
+		
 		# variables storing last value and last position
 		self._last_value = None
 		self._coords = (0, 0)
@@ -63,6 +61,7 @@ class ContinuousDistributionMatrix():
 			}
 		}
 		
+		tab = parent.tabview.tab('Continuous distribution')
 		tab.grid_columnconfigure((0,1), weight=1)
 		tab.grid_rowconfigure((0,1), weight=1)
 		
@@ -109,7 +108,7 @@ class ContinuousDistributionMatrix():
 
 	def error(self, e, msg):
 		EntryHelper.update_value(e,self._last_value)
-		self.error_msg(msg)
+		self.parent.error_msg(msg)
 		return False
 		
 	def check(self, row, i, min_value, max_value):
@@ -198,7 +197,7 @@ class ContinuousDistributionMatrix():
 			df.to_csv(filename)
 		except:
 			msg = "Unable to save continuous_distribution_matrix.csv"
-			self.error_msg(msg)
+			self.parent.error_msg(msg)
 			return False
 
 		return True

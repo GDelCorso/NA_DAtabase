@@ -12,10 +12,9 @@ from GUI_helper import *
 from GUI_MyColorPicker import *
 
 class SamplerPropertiesMatrix():
-	def __init__(self, tab, error_msg, success_msg):
-		# callcack di
-		self.error_msg = error_msg
-		self.success_msg = success_msg
+	def __init__(self, parent):
+
+		self.parent = parent
 
 		self.data = {
 			'dataset_size': StringVar(),
@@ -38,6 +37,8 @@ class SamplerPropertiesMatrix():
 		}
 		
 		self.list1 = []
+		
+		tab = parent.tabview.tab('Sampler Properties')
 		
 		tab.grid_columnconfigure((0,1), weight=1)
 		tab.grid_rowconfigure((0,1), weight=1)
@@ -127,11 +128,11 @@ class SamplerPropertiesMatrix():
 		if len(value) == 0:
 			return
 		if value.isnumeric() == False:
-			self.error_msg("Error, value must be numeric.")
+			self.parent.error_msg("Error, value must be numeric.")
 			EntryHelper.update_value(e, '0')
 			return False
 		else:
-			self.success_msg("%s inserted successfully." % value)
+			self.parent.success_msg("%s inserted successfully." % value)
 			return True
 
 	def v_float(self, e):
@@ -142,15 +143,15 @@ class SamplerPropertiesMatrix():
 		try:
 			f = float(value)
 			if f < 0 or f > 1:
-				self.error_msg("Error: probability must be a float number between 0 and 1).")
+				self.parent.error_msg("Error: probability must be a float number between 0 and 1).")
 				EntryHelper.update_value(e, '0')
 				return False
 			else:
-				self.success_msg("%s inserted successfully." % value)
+				self.parent.success_msg("%s inserted successfully." % value)
 				return True
 				
 		except ValueError:
-			self.error_msg("Error: probability must be a float number between 0 and 1).")
+			self.parent.error_msg("Error: probability must be a float number between 0 and 1).")
 			EntryHelper.update_value(e, '0')
 			return False
 		
@@ -195,7 +196,7 @@ class SamplerPropertiesMatrix():
 	def add_cc(self):
 		cc_shape, cc_color = self.cbox['shape'][0].get(),self.cbox['color'][0].get()
 		if (len(cc_shape)+len(cc_color) == 0):
-			return self.error_msg("Error: one of Shape/Color combobox in Correct Classes must be valued.")
+			return self.parent.error_msg("Error: one of Shape/Color combobox in Correct Classes must be valued.")
 		if len(cc_shape) == 0:
 			value = str(ColorHelper.hexToRGB(cc_color))
 		elif len(cc_color) == 0:
@@ -207,7 +208,7 @@ class SamplerPropertiesMatrix():
 		if value not in self.list1:
 			self.list1.append(value)
 		else:
-			self.error_msg('%s already present in list.' % value)
+			self.parent.error_msg('%s already present in list.' % value)
 			
 		TextboxHelper.update_value(self.cc_textbox, "[%s]" % ', '.join(self.list1))
 		print(self.list1)
@@ -217,7 +218,7 @@ class SamplerPropertiesMatrix():
 	def reset_cc(self):
 		self.list1 = [];
 		TextboxHelper.update_value(self.cc_textbox, "")
-		self.success_msg("Correct classes resetted.")
+		self.parent.success_msg("Correct classes resetted.")
 		
 	def reduce(self,array):
 		array = array.split(";")
@@ -268,7 +269,7 @@ class SamplerPropertiesMatrix():
 
 		except:
 			msg = "Unable to save sampler_properties_matrix.csv"
-			self.error_msg(msg)
+			self.parent.error_msg(msg)
 			return False
 
 		return True

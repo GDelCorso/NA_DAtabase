@@ -71,12 +71,14 @@ class App(CTk):
 
 		# add contents for every tab
 		
-		self.SamplerPropertiesMatrix = SamplerPropertiesMatrix(self.tabview.tab('Sampler Properties'), self.error_msg, self.success_msg)
-		self.UncertantiesMatrix = UncertantiesMatrix(self.tabview.tab('Uncertanties'), self.error_msg, self.success_msg)
-		self.ContinuousDistributionMatrix = ContinuousDistributionMatrix(self.tabview.tab('Continuous distribution'), self.error_msg, self.success_msg)
-		self.MultivariateDistributionMatrix = MultivariateDistributionMatrix(self.tabview.tab('Multivariate distribution'), self.error_msg, self.success_msg)
-		self.ShapesAndColorsMatrix = ShapesAndColorsMatrix(self.tabview.tab('Shapes and Colors'), self.error_msg, self.success_msg, self.SamplerPropertiesMatrix, self.MultivariateDistributionMatrix, self.UncertantiesMatrix)
+		self.SamplerPropertiesMatrix = SamplerPropertiesMatrix(self)
+		self.UncertantiesMatrix = UncertantiesMatrix(self)
+		self.ContinuousDistributionMatrix = ContinuousDistributionMatrix(self)
+		self.MultivariateDistributionMatrix = MultivariateDistributionMatrix(self)
+		self.ShapesAndColorsMatrix = ShapesAndColorsMatrix(self)
 		
+		self.focus_force()
+
 		# ask for db name 
 		self.ask_db_name()
 		# TODO: shows choose-preset window
@@ -96,6 +98,7 @@ class App(CTk):
 		'''
 		dialog = CTkInputDialog(title="Database name", text="Enter Database name:")
 		self.db_name = dialog.get_input()
+		self.focus_force()
 
 		if(self.db_name is None):
 			self.destroy()
@@ -128,6 +131,7 @@ class App(CTk):
 		self.message_box.configure(text=msg, text_color="#6f6")
 		if(alert):
 			CTkMessagebox(title="Success", message=msg, icon="check")
+			self.focus_force()
 			#tkmb.showinfo(title='Success', message=msg, icon='info')
 
 	def error_msg(self, msg, alert = True):
@@ -137,6 +141,8 @@ class App(CTk):
 		self.message_box.configure(text=msg, text_color="#f66")
 		if(alert):
 			CTkMessagebox(title="Error", message=msg, icon="cancel")
+			self.focus_force()
+			
 			#tkmb.showinfo(title='Error', message=msg, icon='error')
 	
 	def info_msg(self, msg):
@@ -144,6 +150,7 @@ class App(CTk):
 		show an info message on message box
 		'''
 		CTkMessagebox(title="Info", message=msg, icon="info", width=600)
+		self.focus_force()
 		#tkmb.showinfo(title='Info', message=msg, icon='info')
 	
 # set the dark mode

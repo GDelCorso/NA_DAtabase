@@ -128,10 +128,10 @@ class MultivariateDistributionMatrixTop(CTkToplevel):
 			f = float(value)
 			if f >= -1 and f <= 1:
 				return True
-			self.parent.error_msg("Error: matrix value must be a float number between -1 and 1.")
+			self.parent.parent.error_msg("Error: matrix value must be a float number between -1 and 1.")
 			return False
 		except ValueError:
-			self.parent.error_msg("Error: matrix value must be a float number between -1 and 1.")
+			self.parent.parent.error_msg("Error: matrix value must be a float number between -1 and 1.")
 			return False
 	
 

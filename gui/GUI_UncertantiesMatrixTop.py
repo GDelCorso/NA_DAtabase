@@ -208,15 +208,15 @@ class UncertantiesMatrixTop(CTkToplevel):
 		try:
 			f = float(value)
 			if f < 0 or f > 1:
-				self.parent.error_msg("Error: probability must be a float number between 0 and 1).")
+				self.parent.parent.error_msg("Error: probability must be a float number between 0 and 1).")
 				EntryHelper.update_value(e, '0')
 				return False
 			else:
-				self.parent.success_msg("%s inserted successfully." % value)
+				self.parent.parent.success_msg("%s inserted successfully." % value)
 				return True
 				
 		except ValueError:
-			self.parent.error_msg("Error: probability must be a float number between 0 and 1).")
+			self.parent.parent.error_msg("Error: probability must be a float number between 0 and 1).")
 			EntryHelper.update_value(e, '0')
 			return False
 
@@ -224,7 +224,7 @@ class UncertantiesMatrixTop(CTkToplevel):
 		cc_shape1, cc_shape2, cc_color1, cc_color2, p = self.cbox['shape'][0].get(),self.cbox['shape'][1].get(),self.cbox['color'][0].get(),self.cbox['color'][1].get(), self.p
 		
 		if len(p.get()) == 0:
-			self.parent.error_msg("Error: Probability in Classification Noise cannot be empty.")
+			self.parent.parent.error_msg("Error: Probability in Classification Noise cannot be empty.")
 			return
 
 		if (self.v_float(p) == False):
@@ -244,16 +244,18 @@ class UncertantiesMatrixTop(CTkToplevel):
 		if value_to_check not in map(self.reduce,self.stuff['list']):
 			self.stuff['list'].append(value)
 		else:
-			self.parent.error_msg('%s already present in list.' % value_to_check)
+			self.parent.parent.error_msg('%s already present in list.' % value_to_check)
 
 		TextboxHelper.update_value(self.cn_textbox, '\n'.join(self.stuff['list']))
 		
 		return 
 
 	def reset_cn(self):
+		if hasattr(self, 'stuff'):
+			self.stuff['list'] = []
 
 		EntryHelper.update_value(self.p, None)
-
+		
 		self.c1.deselect()
 		self.c2.deselect()
 
@@ -268,7 +270,7 @@ class UncertantiesMatrixTop(CTkToplevel):
 	def reset_distribution(self):
 		self._update_values(self.parent._empty_cell_matrix())
 
-		self.parent.success_msg("All Reset to default.")
+		self.parent.parent.success_msg("All Reset to default.")
 
 	def reduce(self,array):
 		array = array.split(";")
@@ -286,6 +288,7 @@ class UncertantiesMatrixTop(CTkToplevel):
 		self.reset_distribution()
 		
 		self.stuff = stuff
+		
 		self.row = row
 		self.col = col
 		self.multiple = multiple
@@ -327,7 +330,7 @@ class UncertantiesMatrixTop(CTkToplevel):
 			return
 
 		if i==0 and value == "+%s" % ContinuousVariableHelper.infinity or i==3 and value == "-%s" % ContinuousVariableHelper.infinity:
-			self.parent.error_msg("Error: %s can't be %s." % (ContinuousVariableHelper.index[i], value))
+			self.parent.parent.error_msg("Error: %s can't be %s." % (ContinuousVariableHelper.index[i], value))
 			EntryHelper.update_value(e,self._last_value)
 			return
 
@@ -335,12 +338,12 @@ class UncertantiesMatrixTop(CTkToplevel):
 			value = float(value)
 			
 			if value < min_value:
-				self.parent.error_msg("Error: %s must be greater than %s." % (ContinuousVariableHelper.title(ContinuousVariableHelper.index[i]), str(min_value)))
+				self.parent.parent.error_msg("Error: %s must be greater than %s." % (ContinuousVariableHelper.title(ContinuousVariableHelper.index[i]), str(min_value)))
 				EntryHelper.update_value(e,self._last_value)
 				return
 		
 			if value > max_value:
-				self.parent.error_msg("Error: %s must be lower than %s." % (ContinuousVariableHelper.title(ContinuousVariableHelper.index[i]), str(max_value)))
+				self.parent.parent.error_msg("Error: %s must be lower than %s." % (ContinuousVariableHelper.title(ContinuousVariableHelper.index[i]), str(max_value)))
 				EntryHelper.update_value(e,self._last_value)
 				return
 
@@ -351,20 +354,20 @@ class UncertantiesMatrixTop(CTkToplevel):
 			u_value = u.get().strip()
 
 			if i==2 and value <= 0:
-				self.parent.error_msg("Error: %s must be greater than zero." % ContinuousVariableHelper.title(ContinuousVariableHelper.index[i]))
+				self.parent.parent.error_msg("Error: %s must be greater than zero." % ContinuousVariableHelper.title(ContinuousVariableHelper.index[i]))
 				EntryHelper.update_value(e,self._last_value)
 				return
 			
 			if len(l_value) > 0 and len(u_value) > 0:
 				if float(l_value) >= float(u_value):
-					self.parent.error_msg("Error: %s must be greater than %s." % (ContinuousVariableHelper.title(ContinuousVariableHelper.index[3]),ContinuousVariableHelper.title(ContinuousVariableHelper.index[0])))
+					self.parent.parent.error_msg("Error: %s must be greater than %s." % (ContinuousVariableHelper.title(ContinuousVariableHelper.index[3]),ContinuousVariableHelper.title(ContinuousVariableHelper.index[0])))
 					EntryHelper.update_value(e,self._last_value)
 					return False
 
-			self.parent.success_msg("%s inserted successfully." % ContinuousVariableHelper.title(ContinuousVariableHelper.index[i]))
+			self.parent.parent.success_msg("%s inserted successfully." % ContinuousVariableHelper.title(ContinuousVariableHelper.index[i]))
 			return True
 		except ValueError:
-			self.parent.error_msg("Error: %s must be a numeric value." % ContinuousVariableHelper.title(ContinuousVariableHelper.index[i]))
+			self.parent.parent.error_msg("Error: %s must be a numeric value." % ContinuousVariableHelper.title(ContinuousVariableHelper.index[i]))
 			EntryHelper.update_value(e,self._last_value)
 			return False
 
@@ -396,7 +399,7 @@ class UncertantiesMatrixTop(CTkToplevel):
 					errors = True
 
 		if errors:
-			self.parent.error_msg("Warning, All unlocked distribution values must be filled.")
+			self.parent.parent.error_msg("Warning, All unlocked distribution values must be filled.")
 			return
 
 		min_value = 0
@@ -410,7 +413,8 @@ class UncertantiesMatrixTop(CTkToplevel):
 		if self.multiple:
 			self.parent.update_multiple_matrix(self.stuff, self.row, self.col)
 		
-		self.parent.success_msg("Matrix updated successfully.")
+		self.parent.parent.success_msg("Matrix updated successfully.")
+		del self.stuff
 		self._close()
 	
 	def _entry(self, master, row, i, what):

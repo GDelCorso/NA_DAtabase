@@ -24,18 +24,17 @@ class UncertantiesMatrix():
 
 	oob = -2
 
-	def __init__(self, tab, error_msg, success_msg):
-		# callcack di
-		self.error_msg = error_msg
-		self.success_msg = success_msg
+	def __init__(self, parent):
+		self.parent = parent
+
 		self.G = None
 		self.u_matrix = np.empty((0,0), dtype=object)
 		self.cells = np.array([[]])
-		
-		
 
 		self.UncertantiesMatrixTop = UncertantiesMatrixTop(self)
 		self.UncertantiesMatrixTop.withdraw()
+
+		tab = parent.tabview.tab('Uncertanties')
 
 		bf = CTkFrame(tab)
 		bf.grid(row=0, column=0, padx=10,sticky="we")
@@ -158,7 +157,7 @@ class UncertantiesMatrix():
 					pd.DataFrame(csvdata, index=ContinuousVariableHelper.index, columns=self.continuous_variables).to_csv(filename)
 				except:
 					msg = "Unable to write %s" % os.path.basename(filename)
-					self.error_msg(msg)
+					self.parent.error_msg(msg)
 					return False	
 
 				list_cn = self.u_matrix[ci][si]['list']
@@ -183,7 +182,7 @@ class UncertantiesMatrix():
 					pd.DataFrame(csvdata, columns=['classification_noise']).to_csv(filename, index=False)	
 				except:
 					msg = "Unable to write %s" % os.path.basename(filename)
-					self.error_msg(msg)
+					self.parent.error_msg(msg)
 					return False	
 
 		return True

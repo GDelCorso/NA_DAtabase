@@ -16,16 +16,17 @@ class MultivariateDistributionMatrix():
 
 	oob = -2
 
-	def __init__(self, tab, error_msg, success_msg):
-		# callcack di
-		self.error_msg = error_msg
-		self.success_msg = success_msg
+	def __init__(self, parent):
+		self.parent = parent
+		
 		self.G = None
 		self.d_matrix = np.empty((0,0), dtype=object)
 		self.cells = np.array([[]])
 		
 		self.MultivariateDistributionMatrixTop = MultivariateDistributionMatrixTop(self, self._empty_cell_matrix())
 		self.MultivariateDistributionMatrixTop.withdraw()
+
+		tab = parent.tabview.tab('Multivariate distribution')
 
 		bf = CTkFrame(tab)
 		bf.grid(row=0, column=0, padx=10,sticky="we")
@@ -51,7 +52,7 @@ class MultivariateDistributionMatrix():
 	def normalize_selected(self):
 		for m in self._groupToModify:
 			self.d_matrix[m['row']][m['col']],s = self._find_s(self.d_matrix[m['row']][m['col']])
-		self.success_msg("Normalization applied successfully", True)
+		self.parent.success_msg("Normalization applied successfully", True)
 		return
 
 	def _scale_M(self, M,s):
