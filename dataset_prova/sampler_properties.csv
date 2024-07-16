@@ -1,4 +1,0 @@
-dataset_name,dataset_size,sampling_strategy,random_seed,pixel_resolution_x,pixel_resolution_y,correct_classes,noise_order,classification_noise,background_color,extra
-test_GC,80,MC,1902,120,120,4,blur,"[1/(0,0,1)];[3,];0.2","(0,0,0)",standard
-,,,,,,"3; (0,1,0)",holes,[1/];[3/];0.1,,
-,,,,,,"(1,1,1)",wn,[/];[7/];0.2,,
