@@ -131,7 +131,6 @@ class App(CTk):
 		self.message_box.configure(text=msg, text_color="#6f6")
 		if(alert):
 			CTkMessagebox(title="Success", message=msg, icon="check")
-			self.focus_force()
 			#tkmb.showinfo(title='Success', message=msg, icon='info')
 
 	def error_msg(self, msg, alert = True):
@@ -141,8 +140,6 @@ class App(CTk):
 		self.message_box.configure(text=msg, text_color="#f66")
 		if(alert):
 			CTkMessagebox(title="Error", message=msg, icon="cancel")
-			self.focus_force()
-			
 			#tkmb.showinfo(title='Error', message=msg, icon='error')
 	
 	def info_msg(self, msg):
@@ -150,7 +147,6 @@ class App(CTk):
 		show an info message on message box
 		'''
 		CTkMessagebox(title="Info", message=msg, icon="info", width=600)
-		self.focus_force()
 		#tkmb.showinfo(title='Info', message=msg, icon='info')
 	
 # set the dark mode
