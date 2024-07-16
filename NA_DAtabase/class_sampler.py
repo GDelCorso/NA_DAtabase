@@ -1,19 +1,18 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sun Nov 19 21:00:10 2023
-
-2) SISTEMARE TODO
-
-4) IMPORTARE MATRICE CORRELAZIONE
-
-5) FARE CONTROLLO STOCASTICO DAL CENTRO - QUI CI SONO I TRUCCHI DI COME IMPLEMENTARE IL CONTROLLO "RAGGIO VS CENTRO"
-https://openturns.github.io/openturns/latest/auto_probabilistic_modeling/distributions/plot_truncated_distribution.html#sphx-glr-auto-probabilistic-modeling-distributions-plot-truncated-distribution-py
-
-@author: Claudia Caudai, Giulio Del Corso, and Federico Volpini
+Claudia Caudai, Giulio Del Corso, and Federico Volpini
 """
+
+
 ###############################################################################
-
-
+# Libraries
+import os
+import shutil
+import numpy as np
+import pandas as pd
+import openturns as ot
+import random
 
 
 
@@ -26,24 +25,25 @@ class random_sampler:
     '''
 
     def __init__(self, 
-                 dataset_properties = None, 
-                 dataset_correlation = None, 
+                 dataset_name = None,
+                 main_path = None,
+                 give_full_path = None,
                  shapes_colors = None,
                  sampler_properties = None, 
-                 dataset_name = None,
-                 main_path = None):
-        '''
-        dataset_properties = None : csv file of dataset properties
-        dataset_correlation = None : csv file of correlation matrices
-        shapes_colors = None : csv file of shapes/colors probabilities
-        sampler_properties = None : csv file of sampler properties 
-        dataset_name = None : name of the dataset
-        main_path = None : main path (if None -> main_path = current directory)
-        '''
+                 dataset_correlation = None,
+                 continuous_variables = None,
+                 max_find_another = 10000):
         
-        # Libraries:
-        import os
-        import shutil
+        '''
+        dataset_name = None : name of the dataset.
+        main_path = None : main path (if None -> main_path = current directory).
+        give_full_path = None: full absolute path, if not none, overwrite the others.
+        shapes_colors = None : csv file of shapes/colors probabilities.
+        sampler_properties = None : csv file of sampler properties.
+        dataset_correlation = None : csv file of correlation matrices.
+        continuous_variables = None : csv file of continuous distributions.
+        max_find_another = 10000 : maximum number of resampling for MC simulations.
+        '''
         
         # Define the actual path
         if main_path == None:
@@ -55,42 +55,78 @@ class random_sampler:
         if dataset_name == None:
             self.dataset_name = 'dataset'
         else:
-            self.dataset_name = 'dataset_'+dataset_name
-            
-        self.path_save_folder = os.path.join(self.path_cwd, self.dataset_name)
+            self.dataset_name = dataset_name
         
+        # Overwrite if the full absolute path is given
+        if give_full_path==None:
+            self.path_save_folder = os.path.join(self.path_cwd, 
+                                                 self.dataset_name)
+        else:
+            self.path_save_folder = give_full_path
+        
+        # Initialize the save folder
         if not os.path.isdir(self.path_save_folder):
             os.mkdir(self.path_save_folder)
 
-        # Define the file paths
-        # Properties of the dataset:
-        self.path_dataset_properties = os.path.join(self.path_save_folder, 
-                                                      'dataset_properties.csv')
+        # Define the file paths:
         # Probabilites of colors and shapes:
         self.path_shapes_colors = os.path.join(self.path_save_folder, 
-                                             'shapes_colors_probabilities.csv')
-        # Correlation matrix:
-        self.path_dataset_correlation = os.path.join(self.path_save_folder, 
-                                                     'dataset_correlation.csv')
-        # Sampler properties::
-        self.path_sampler_properties = os.path.join(self.path_save_folder, 
-                                                      'sampler_properties.csv')
-        
-        # Initialize with non-standard csv files:
-        # Marginals    
-        if dataset_properties != None:
-            self.path_save_dataset_properties = dataset_properties
-            
-        # Probabilities of colors and shapes:
-        if dataset_correlation != None:
+                                                'shapes_and_colors_matrix.csv')
+        if shapes_colors != None:
             self.path_shapes_colors = shapes_colors
-        
-        # Correlation matrix of matrices
-        if dataset_correlation != None:
-            self.path_dataset_correlation = dataset_correlation
-            
+
+        # Sampler properties:
+        self.path_sampler_properties = os.path.join(self.path_save_folder, 
+                                               'sampler_properties_matrix.csv')
         if sampler_properties != None:
-            self.path_sampler_properties = sampler_properties
+            self.path_sampler_properties = sampler_properties        
+        
+        # Correlation matrix of continuous distribution: 
+        self.path_dataset_correlation = os.path.join(self.path_save_folder, 
+                                        'multivariate_distribution_matrix.csv')
+        if dataset_correlation != None:
+            self.path_dataset_correlation = dataset_correlation       
+        
+        # Continuous Variable Distribution:
+        self.path_continuous_variables = os.path.join(self.path_save_folder, 
+                                          'continuous_distribution_matrix.csv')
+        if continuous_variables != None:
+            self.path_continuous_variables = continuous_variables            
+
+   
+            
+        # Import all the classification noises
+        # List all the elements in the folder
+        list_csv = os.listdir(self.path_save_folder)
+        aux_list = [i.split('_')[4].split('.')[0].split('-')                     
+                    for i in list_csv if "uncertanties_classification_noise" in i]
+        aux_list = ["("+i[0]+', '+i[1]+', '+i[2]+')' for i in aux_list]
+        # Select only csv containing
+        list_selected_csv = [[int(i.split('_')[3]),i] 
+                                 for i in list_csv 
+                                   if "uncertanties_classification_noise" in i]
+        
+        self.df_path_classification_noise = pd.DataFrame(list_selected_csv, 
+                                          columns = ['shape', 'path'])
+        self.df_path_classification_noise['color'] = aux_list
+
+
+
+        # Import all the distribution noises
+        # List all the elements in the folder
+        list_csv = os.listdir(self.path_save_folder)
+        # Select only csv containing
+        aux_list = [i.split('_')[4].split('.')[0].split('-')                     
+                    for i in list_csv if "uncertanties_distribution_matrix" in i]
+        aux_list = ["("+i[0]+', '+i[1]+', '+i[2]+')' for i in aux_list]
+        list_selected_csv = [[int(i.split('_')[3]), i] 
+                             for i in list_csv 
+                                   if "uncertanties_distribution_matrix" in i]
+        
+        self.df_path_distribution_noise = pd.DataFrame(list_selected_csv, 
+                                          columns = ['shape', 'path'])
+        self.df_path_distribution_noise['color'] = aux_list
+    
         
         # Save folder:    
         if dataset_name == None:
@@ -108,61 +144,43 @@ class random_sampler:
             os.mkdir(self.path_save_dataset)    
             
         # Define the maximum amount of resampling:
-        self.max_find_another = 100000
+        self.max_find_another = max_find_another
             
         
-    def import_dataset_properties(self, 
-                                  path_dataset_properties = None, 
-                                  path_dataset_correlation = None, 
-                                  path_shapes_colors = None, 
-                                  path_sampler_properties = None):
+        
+    def import_dataset_properties(self):
         '''
         (Method) import the .cvs with the dataset properties
-        dataset_properties = None : csv file of dataset properties
-        dataset_correlation = None : csv file of correlation matrices
-        shapes_colors = None : csv file of shapes/colors probabilities
-        sampler_properties = None : csv file of sampler properties 
         '''
         
-        # Libraries
-        import os
-        import pandas as pd
-        import numpy as np
-        
-        # Update datasets with different name
-        if path_dataset_properties != None:  
-            self.path_dataset_properties = path_dataset_properties
-        if path_shapes_colors != None:  
-            self.path_shapes_colors = path_shapes_colors
-        if path_dataset_correlation != None:
-            self.path_dataset_correlation = path_dataset_correlation
-        if path_sampler_properties != None:
-            self.path_sampler_properties = path_sampler_properties
-         
-        # Read csv with marginals
-        self.dataset_properties = \
-                 pd.read_csv(self.path_dataset_properties)
-         
         try:
-            # Import dataset:
-            # Dataset properties:
-            self.dataset_properties = \
-                  pd.read_csv(self.path_dataset_properties)
-            
-            # Colors and shape probabilities:
-            self.shapes_colors = \
-                  pd.read_csv(self.path_shapes_colors)       
-        
-            # Correlation matrix:
-            self.dataset_correlation = \
-                pd.read_csv(self.path_dataset_correlation, header=None)
-            
             # Sampler properties:
             self.sampler_properties = \
-                pd.read_csv(self.path_sampler_properties)
+                pd.read_csv(self.path_sampler_properties) 
                 
-            # Define the useful variables:
+            # Colors and shape probabilities:
+            self.shapes_colors = \
+                  pd.read_csv(self.path_shapes_colors)             
+                
+            # Correlation matrix:
+            self.dataset_correlation = \
+                pd.read_csv(self.path_dataset_correlation, header=0).iloc[:, 1:]  
+            
+            self.dataset_correlation = self.dataset_correlation.to_numpy()
+            self.dataset_correlation = self.dataset_correlation[:,:].astype('float')            
+            
+            
+            # Continuous variable
+            self.continuous_variables = \
+                  pd.read_csv(self.path_continuous_variables).iloc[:, 1:]
+            self.continuous_variables = self.continuous_variables.replace(np.nan, None)
+            
+            # We keep as dataframes noises, to import them when necessary
+            
+            # Define the useful variables:              
             self.dataset_size = self.sampler_properties['dataset_size'][0]
+            
+            
             self.sampling_strategy = \
                 self.sampler_properties['sampling_strategy'][0]
                 
@@ -172,7 +190,7 @@ class random_sampler:
                 
             self.random_seed = \
                 int(self.sampler_properties['random_seed'][0])
-                
+            
             self.pixel_resolution_x = \
                 int(self.sampler_properties['pixel_resolution_x'][0])
                 
@@ -183,30 +201,23 @@ class random_sampler:
                 self.sampler_properties['correct_classes']\
                     .replace(np.nan, None).to_list()
             self.correct_class = [i for i in self.correct_class if i is not None]    
-                
-            self.classification_noise = \
-                self.sampler_properties['classification_noise'].to_list()
             
             self.out_of_border = self.sampler_properties['out_of_border']\
                 .replace(np.nan, None).to_list()
             self.out_of_border = \
                 [i for i in self.out_of_border if i is not None][0]   
-            self.out_of_border = True
-            
+                
             self.background_color = \
                 self.sampler_properties['background_color'][0]
-            
+                
+            # Define the list of shapes and colors:
+            self.list_shapes = (self.shapes_colors.columns).to_list()[1:]
+            self.list_colors = (self.shapes_colors).iloc[:,0].values.tolist()
+                 
+        
         except:
-            if (not os.path.isfile(self.path_dataset_properties)):
-                print("WARNING: wrong path_dataset_properties.")
-            elif (not os.path.isfile(self.path_shapes_colors)):
-                print("WARNING: wrong path_shapes_colors.")
-            elif (not os.path.isfile(self.path_dataset_correlation)):
-                print("WARNING: wrong path_dataset_correlation.")
-            elif (not os.path.isfile(self.path_sampler_properties)):
-                print("WARNING: wrong path_sampler_properties.")
-            else:
-                print("WARNING: import_dataset_properties.")
+            print("WARNING: import_dataset_properties.")
+    
     
     
     def define_marginals(self, shape = None, colour = None):
@@ -217,18 +228,12 @@ class random_sampler:
         colour = None : colour of the image
         '''     
         
-        # Libraries
-        import openturns as ot 
-        import numpy as np
-        
-        # Convert nan to None:
-        self.dataset_properties = self.dataset_properties.replace(np.nan, None)
-        
-        # Define marginals
+        # Aux function to define marginals
         def marginal_continuous_distribution(lower_bound=None, 
-                                             upper_bound=None, 
                                              mu=None, 
-                                             sigma=None):
+                                             sigma=None,
+                                             upper_bound=None
+                                             ):
             
             # Dirac constant distribution (non-null mu)- 
             if (mu!=None)and(lower_bound==None)and(upper_bound==None)\
@@ -268,178 +273,218 @@ class random_sampler:
                 
             return distribution
 
-        marginal_list = []          # List of marginal distributions
-        marginal_list_names = []    # List of marginal names
+        marginal_list = []             # List of marginal distributions
+        marginal_list_names = []       # List of marginal names
+        UQ_marginal_list = []          # List of UQ marginal distributions
+        UQ_marginal_list_names = []    # List of UQ marginal names
+        
         
         # Define the variables:
         # centre	 - Continuous X
         temp_variable_name = 'centre_x'
         distribution = marginal_continuous_distribution(
-            self.dataset_properties[temp_variable_name][0], 
-            self.dataset_properties[temp_variable_name][1], 
-            self.dataset_properties[temp_variable_name][2], 
-            self.dataset_properties[temp_variable_name][3])
+            self.continuous_variables[temp_variable_name][0], 
+            self.continuous_variables[temp_variable_name][1], 
+            self.continuous_variables[temp_variable_name][2], 
+            self.continuous_variables[temp_variable_name][3])
         
         marginal_list_names.append(temp_variable_name)
         marginal_list.append(distribution)
-        
+
+                
+
         # centre	 - Continuous Y
         temp_variable_name = 'centre_y'
         distribution = marginal_continuous_distribution(
-                self.dataset_properties[temp_variable_name][0], 
-                self.dataset_properties[temp_variable_name][1], 
-                self.dataset_properties[temp_variable_name][2], 
-                self.dataset_properties[temp_variable_name][3])
+                self.continuous_variables[temp_variable_name][0], 
+                self.continuous_variables[temp_variable_name][1], 
+                self.continuous_variables[temp_variable_name][2], 
+                self.continuous_variables[temp_variable_name][3])
         
         marginal_list_names.append(temp_variable_name)
         marginal_list.append(distribution)        
         
+        
         # radius - Continuous	
         temp_variable_name = 'radius'
         distribution = marginal_continuous_distribution(
-            self.dataset_properties[temp_variable_name][0], 
-            self.dataset_properties[temp_variable_name][1], 
-            self.dataset_properties[temp_variable_name][2], 
-            self.dataset_properties[temp_variable_name][3])
+            self.continuous_variables[temp_variable_name][0], 
+            self.continuous_variables[temp_variable_name][1], 
+            self.continuous_variables[temp_variable_name][2], 
+            self.continuous_variables[temp_variable_name][3])
         
         marginal_list_names.append(temp_variable_name)
         marginal_list.append(distribution)
         
         
-        # rotation - Continuous - IF CIRCLE, set up to 0
-        temp_variable_name = 'rotation'
-        if shape == '1':
+        # rotation - Continuous - IF CIRCLE, set up to 0   
+        temp_variable_name = 'rotation_(degrees)'
+        if shape == '0':
             # Circles are rotation invariant
             distribution = marginal_continuous_distribution(mu=0)
             marginal_list_names.append(temp_variable_name)
             marginal_list.append(distribution)
         else:
             distribution = marginal_continuous_distribution(
-                self.dataset_properties[temp_variable_name][0], 
-                self.dataset_properties[temp_variable_name][1], 
-                self.dataset_properties[temp_variable_name][2], 
-                self.dataset_properties[temp_variable_name][3])
+                self.continuous_variables[temp_variable_name][0], 
+                self.continuous_variables[temp_variable_name][1], 
+                self.continuous_variables[temp_variable_name][2], 
+                self.continuous_variables[temp_variable_name][3])
             
             marginal_list_names.append(temp_variable_name)
             marginal_list.append(distribution)
         
+        self.marginal_list_names = marginal_list_names
+        self.marginal_list = marginal_list
+        
+        # Define lists of UQ marginals        
+        temp_df_path_distribution_noise = self.df_path_distribution_noise
+        temp_df_path_distribution_noise = temp_df_path_distribution_noise[temp_df_path_distribution_noise['shape']==int(shape)]
+        temp_df_path_distribution_noise = temp_df_path_distribution_noise[temp_df_path_distribution_noise['color']==colour]
+        temp_path_distribution_noise = os.path.join(self.path_save_folder,temp_df_path_distribution_noise.iloc[0]['path'])
+        temp_distribution_noise = pd.read_csv(temp_path_distribution_noise).iloc[:, 1:]
+        temp_distribution_noise = temp_distribution_noise.replace(np.nan, None)
+        
         # deformation - Continuous
         temp_variable_name = 'deformation'
-        if shape == '1':
+        if shape == '0':
             # Circles are deformation invariant
             distribution = marginal_continuous_distribution(mu=0)
-            marginal_list_names.append(temp_variable_name)
-            marginal_list.append(distribution)
+            UQ_marginal_list_names.append(temp_variable_name)
+            UQ_marginal_list.append(distribution)
         else:
             distribution = marginal_continuous_distribution(
-                self.dataset_properties[temp_variable_name][0], 
-                self.dataset_properties[temp_variable_name][1], 
-                self.dataset_properties[temp_variable_name][2], 
-                self.dataset_properties[temp_variable_name][3])
+                temp_distribution_noise[temp_variable_name][0], 
+                temp_distribution_noise[temp_variable_name][1], 
+                temp_distribution_noise[temp_variable_name][2], 
+                temp_distribution_noise[temp_variable_name][3])
             
-            marginal_list_names.append(temp_variable_name)
-            marginal_list.append(distribution)
+            UQ_marginal_list_names.append(temp_variable_name)
+            UQ_marginal_list.append(distribution)
         
         # blur - Continuous
         temp_variable_name = 'blur'
         distribution = marginal_continuous_distribution(
-            self.dataset_properties[temp_variable_name][0], 
-            self.dataset_properties[temp_variable_name][1], 
-            self.dataset_properties[temp_variable_name][2], 
-            self.dataset_properties[temp_variable_name][3])
+            temp_distribution_noise[temp_variable_name][0], 
+            temp_distribution_noise[temp_variable_name][1], 
+            temp_distribution_noise[temp_variable_name][2], 
+            temp_distribution_noise[temp_variable_name][3])
         
-        marginal_list_names.append(temp_variable_name)
-        marginal_list.append(distribution)
+        UQ_marginal_list_names.append(temp_variable_name)
+        UQ_marginal_list.append(distribution)
         
         # white_noise - Continuous	
         temp_variable_name = 'white_noise'
         distribution = marginal_continuous_distribution(
-            self.dataset_properties[temp_variable_name][0], 
-            self.dataset_properties[temp_variable_name][1], 
-            self.dataset_properties[temp_variable_name][2], 
-            self.dataset_properties[temp_variable_name][3])
+            temp_distribution_noise[temp_variable_name][0], 
+            temp_distribution_noise[temp_variable_name][1], 
+            temp_distribution_noise[temp_variable_name][2], 
+            temp_distribution_noise[temp_variable_name][3])
         
-        marginal_list_names.append(temp_variable_name)
-        marginal_list.append(distribution)
+        UQ_marginal_list_names.append(temp_variable_name)
+        UQ_marginal_list.append(distribution)
         
         # holes	- Continuous
         temp_variable_name = 'holes'
         distribution = marginal_continuous_distribution(
-            self.dataset_properties[temp_variable_name][0], 
-            self.dataset_properties[temp_variable_name][1], 
-            self.dataset_properties[temp_variable_name][2], 
-            self.dataset_properties[temp_variable_name][3])
+            temp_distribution_noise[temp_variable_name][0], 
+            temp_distribution_noise[temp_variable_name][1], 
+            temp_distribution_noise[temp_variable_name][2], 
+            temp_distribution_noise[temp_variable_name][3])
         
-        marginal_list_names.append(temp_variable_name)
-        marginal_list.append(distribution)
+        UQ_marginal_list_names.append(temp_variable_name)
+        UQ_marginal_list.append(distribution)
         
         # additive_noise_regression	
         temp_variable_name = 'additive_noise_regression'
         distribution = marginal_continuous_distribution(
-            self.dataset_properties[temp_variable_name][0], 
-            self.dataset_properties[temp_variable_name][1], 
-            self.dataset_properties[temp_variable_name][2], 
-            self.dataset_properties[temp_variable_name][3])
+            temp_distribution_noise[temp_variable_name][0], 
+            temp_distribution_noise[temp_variable_name][1], 
+            temp_distribution_noise[temp_variable_name][2], 
+            temp_distribution_noise[temp_variable_name][3])
         
-        marginal_list_names.append(temp_variable_name)
-        marginal_list.append(distribution)
+        UQ_marginal_list_names.append(temp_variable_name)
+        UQ_marginal_list.append(distribution)
         
         # multiplicative_noise_regression	
         temp_variable_name = 'multiplicative_noise_regression'
         distribution = marginal_continuous_distribution(
-            self.dataset_properties[temp_variable_name][0], 
-            self.dataset_properties[temp_variable_name][1], 
-            self.dataset_properties[temp_variable_name][2], 
-            self.dataset_properties[temp_variable_name][3])
+            temp_distribution_noise[temp_variable_name][0], 
+            temp_distribution_noise[temp_variable_name][1], 
+            temp_distribution_noise[temp_variable_name][2], 
+            temp_distribution_noise[temp_variable_name][3])
         
-        marginal_list_names.append(temp_variable_name)
-        marginal_list.append(distribution)    
+        UQ_marginal_list_names.append(temp_variable_name)
+        UQ_marginal_list.append(distribution)    
         
-        self.marginal_list_names = marginal_list_names
-        self.marginal_list = marginal_list
+        self.UQ_marginal_list_names = UQ_marginal_list_names
+        self.UQ_marginal_list = UQ_marginal_list
+        
+        # Combine the two marginal list names
+        self.combined_marginal_list_names = [*self.marginal_list_names, 
+                                             *self.UQ_marginal_list_names]
         
         
 
     def define_multivariate_distribution(self, corr_matrix, shape, color):
         '''
         Define a multivariate distribution.
-        corr_matrix : (panda dataframe) correlation matrices
+        corr_matrix : (panda dataframe) correlation matrices of the continuous variables
         shape : (str) shape under examination
         color : (str) color under examination
+        Automatically extracts marginals from the parameters of the function.
         '''
-
-        # Libraries
-        import openturns as ot 
         
         # Define the associated multivariate distribution, 
         # they are the same for each class:        
+
+        
+        
         index_color = self.list_colors.index(color) # Rows
         index_shape = self.list_shapes.index(shape) # Columns
+        
         size_sub_matrix = len(self.marginal_list_names)
+        size_sub_UQ_matrix = len(self.UQ_marginal_list_names)
+
         
         
         try:
             # From the full correlation matrix, extract the submatrix:
-            tmp_matrix = corr_matrix.to_numpy()[
-                (index_shape)*size_sub_matrix:(index_shape+1)*size_sub_matrix,
-                (index_color)*size_sub_matrix:(index_color+1)*size_sub_matrix]
+            tmp_matrix = corr_matrix[
+                (index_color)*size_sub_matrix:(index_color+1)*size_sub_matrix,
+                (index_shape)*size_sub_matrix:(index_shape+1)*size_sub_matrix]
             
-            # Define the correlation matrix
-            corr_matrix = ot.CorrelationMatrix(tmp_matrix)
+            # Convert to ot.correlation matrix
+            tmp_matrix = ot.CorrelationMatrix(tmp_matrix)
             
+            # Define the correlation matrix considering tmp_matrix as Spearman 
+            # coefficients            
+            corr_matrix = ot.NormalCopula.GetCorrelationFromSpearmanCorrelation(tmp_matrix)
+            
+            # Define the Copula:
+            Copula = ot.NormalCopula(corr_matrix)
+                
         except:
+            print("\nWARNING: applied a standard Copula, not definite positive")
             # Initialize a standard identical Copula
             corr_matrix = ot.CorrelationMatrix(len(self.marginal_list_names))
-
-        # Define the Copula:
-        Copula = ot.NormalCopula(corr_matrix)
+            Copula = ot.NormalCopula(corr_matrix)
         
         # Define the multivariate distribution:
         multi_distribution = ot.ComposedDistribution(self.marginal_list, 
                                                      Copula)    
         multi_distribution.setDescription(self.marginal_list_names)
         
-        return multi_distribution
+        # Define the UQ multi_distribution
+        UQ_corr_matrix = ot.CorrelationMatrix(len(self.UQ_marginal_list_names))
+        UQ_Copula = ot.NormalCopula(UQ_corr_matrix)
+        
+        UQ_multi_distribution = ot.ComposedDistribution(self.UQ_marginal_list, 
+                                                     UQ_Copula)    
+        UQ_multi_distribution.setDescription(self.UQ_marginal_list_names)
+        
+        
+        return [multi_distribution, UQ_multi_distribution]
     
     
     
@@ -451,18 +496,16 @@ class random_sampler:
         color = 'no_color' : save the dataset of the given color
         '''
         
-        # Libraries
-        import os
-        import pandas as pd
-        import numpy as np
-        import random
-        
         random.seed(self.random_seed)
+        
+        
+        #TODO devo estrarre i nomi di tutte le variabili
+
         
         # Define the dictionary to define the correct list name
         sample_df = pd.DataFrame(sample_df.to_numpy(), 
-                                 columns = self.marginal_list_names)
-               
+                                 columns = self.combined_marginal_list_names)
+        
         # Add index for each element:
         sample_df['ID_image'] = ['ID_'+str(shape)+'_'+str(color)+'_'+str(i) 
                                  for i in range(len(sample_df))]
@@ -491,7 +534,9 @@ class random_sampler:
             sample_df['regression_centering']*\
             (100+sample_df['multiplicative_noise_regression'])/100\
                 +sample_df['additive_noise_regression']
-                
+        
+        
+        
         # Define the correct shapes and colors
         correct_shapes = [] # ONLY shapes
         correct_colors = [] # ONLY color
@@ -499,7 +544,7 @@ class random_sampler:
         
         
         for i_list in range(len(self.correct_class)):
-            tmp_correct_class = self.correct_class[i_list].split('/')
+            tmp_correct_class = self.correct_class[i_list].split('/') # Split using /
             tmp_correct_class =  [i for i in tmp_correct_class if i != '']   
 
             if len(tmp_correct_class) >1:
@@ -515,23 +560,33 @@ class random_sampler:
         # Noisy classification class                                 
         sample_df['shape_noisy'] = sample_df['shape']
         sample_df['color_noisy'] = sample_df['color']
-                
+        
         # Correct/Noisy classification class - Classes can be shape/color/combination
         # Iterate on the dataframe:
         sample_df['correct_class'] = False
         sample_df['noisy_class'] = False
         
+        # Import uncertanties_classification_noise
+        temp_df_path_uncertanties_classification_noise = self.df_path_classification_noise
+        temp_df_path_uncertanties_classification_noise = temp_df_path_uncertanties_classification_noise[temp_df_path_uncertanties_classification_noise['shape']==int(shape)]
+        temp_df_path_uncertanties_classification_noise = temp_df_path_uncertanties_classification_noise[temp_df_path_uncertanties_classification_noise['color']==color]
+        temp_df_path_uncertanties_classification_noise = os.path.join(self.path_save_folder,temp_df_path_uncertanties_classification_noise.iloc[0]['path'])
+        temp_distribution_noise = pd.read_csv(temp_df_path_uncertanties_classification_noise)#.iloc[:,1:]
+        temp_distribution_noise = temp_distribution_noise.replace(np.nan, None)
+      
+      
         for i_row in range(len(sample_df)):
             row = sample_df.iloc[i_row]
 
             # Check if shape is correct
             if int(row['shape']) in list(correct_shapes):
                 sample_df.loc[i_row,'correct_class'] = True
-                
+        
+        
             # Define the "noisy" classification label
             # The noisy classification is defined from a class (shape, color)
             # to another class. 'all'/'' means that every class is changed:
-            for noisy_class in self.classification_noise:
+            for noisy_class in temp_distribution_noise:
                 try:
                     noisy_class_split = noisy_class.split(';')                
                     first_class_shape = noisy_class_split[0].replace('[','').replace(']','').split('/')[0] # If empty len() == 0
@@ -619,10 +674,14 @@ class random_sampler:
                 if (int(row['shape_noisy']) == element_shape)and\
                                     (str(row['color_noisy']) == element_color):
                     sample_df.loc[i_row,'noisy_class'] = True   
-                    
+             
+        #TODO il colore va rimesso
         path_save_csv = os.path.join(self.path_save_dataset, \
-                                   'partial_'+str(shape)+'_'+str(color)+'.csv')
+                                    'partial_'+str(shape)+'_'+str(color)+'.csv')
+        path_save_csv.replace("/","\\")    
+        
         sample_df.to_csv(path_save_csv, index = False)
+        
     
     
     
@@ -635,6 +694,7 @@ class random_sampler:
         import pandas as pd
         
         list_csv = os.listdir(self.path_save_dataset)
+        
         try:
             list_csv.remove('combined_dataframe.csv')
         except:
@@ -662,19 +722,14 @@ class random_sampler:
         Call the sampler and define the whole dataset.
         '''
         
-        import openturns as ot
-        
-        # Define the list of shapes and colors:
-        self.list_shapes = (self.shapes_colors.columns).to_list()[1:]
-        self.list_colors = (self.shapes_colors).iloc[:,0].values.tolist()
-        
         # Define the combined distribution with the given copula
         seed_modifier = 1        
         
         for shape in self.list_shapes:
             for color in self.list_colors:
+
                 # Re-define marginals for each combination:
-                self.define_marginals(shape, color)
+                self.define_marginals(shape, color)                  
                 
                 # Recover the property from shapes_colors
                 # Probability
@@ -683,19 +738,17 @@ class random_sampler:
                 tmp_dataset_size = int(self.dataset_size*tmp_probability)
 
                 # Define the multivariate distribution
-                multi_distribution = self.define_multivariate_distribution(
+                [multi_distribution, UQ_multi_distribution] = self.define_multivariate_distribution(
                     corr_matrix = self.dataset_correlation,
                     shape = shape, color = color)
                 
-                # Call the sampler: Modified to avoid same results among shapes
+                # Call the sampler on multi_distribution (continuous variables)
                 ot.RandomGenerator.SetSeed(self.random_seed*seed_modifier)
                 seed_modifier += 1
                 
-                # Standard Monte Carlo
                 if self.sampling_strategy == 'MC':  
                     tmp_sample_df = multi_distribution.getSample\
-                                            (tmp_dataset_size).asDataFrame()
-                                            
+                                            (tmp_dataset_size).asDataFrame()           
                 # If the method is Monte Carlo and out_of_border is False, 
                 # center outside the border are not allowed and resampled
                     resampler_seed = 1
@@ -758,16 +811,46 @@ class random_sampler:
                     print("WARNING: sampling strategy definition.")
                     tmp_sample_df = multi_distribution.getSample\
                                             (tmp_dataset_size).asDataFrame()
-                                            
+                
+                # Call the sampler on UQ_multi_distribution (uncertainty)
+                ot.RandomGenerator.SetSeed(self.random_seed*seed_modifier)
+                seed_modifier += 1
+                
+                if self.sampling_strategy == 'MC':  
+                    UQ_tmp_sample_df = UQ_multi_distribution.getSample\
+                                            (tmp_dataset_size).asDataFrame()           
+          
+                # Latin Hyper Cube Sampling
+                elif self.sampling_strategy == 'LHC':
+                    UQ_exp = ot.LHSExperiment(UQ_multi_distribution, \
+                                           tmp_dataset_size, False, False)
+                    UQ_tmp_sample_df = UQ_exp.generate().asDataFrame()
+                    
+                # Low Discrepancy Sequence (SOBOL)    
+                elif self.sampling_strategy == 'LDS':
+                    UQ_sequence = ot.SobolSequence(len(self.UQ_marginal_list_names))
+                    UQ_exp = ot.LowDiscrepancyExperiment(UQ_sequence,\
+                                UQ_multi_distribution, tmp_dataset_size, False)
+                    UQ_tmp_sample_df = UQ_exp.generate().asDataFrame()
+                else:
+                    print("WARNING: sampling strategy definition.")
+                    UQ_tmp_sample_df = UQ_multi_distribution.getSample\
+                                            (tmp_dataset_size).asDataFrame()
+                
+                
+                # Concatenate two dataframes
+                tmp_combined_sample_df = tmp_sample_df.join(UQ_tmp_sample_df, lsuffix='_caller', rsuffix='_other')
+                
                 # Convert the float variable (holes) to an integer one:
-                for i_row in range(len(tmp_sample_df)):
-                    row = tmp_sample_df.iloc[i_row]
-                    tmp_sample_df.loc[i_row,'holes'] = int(round(row['holes']))
+                for i_row in range(len(tmp_combined_sample_df)):
+                    row = tmp_combined_sample_df.iloc[i_row]
+                    tmp_combined_sample_df.loc[i_row,'holes'] = int(round(row['holes']))
+                
                 
                 # Call the method to produce the csv for the given sample
-                self.define_csv(tmp_sample_df, shape = shape, color = color)
-        
-        self.merge_dataset()
+                self.define_csv(tmp_combined_sample_df, shape = shape, color = color)
+                          
+        self.merge_dataset() 
      
         
     def generate_images(self):
@@ -776,15 +859,22 @@ class random_sampler:
         '''
 
         MDB = MorphShapes_DB_Builder(self.path_save_folder)
+        
         MDB.generate()
+        
+        
+        
         
     def auto_process(self):
         '''
         Execute all the standard instructions to produce the dataset,.
         '''
         
-        self.import_dataset_properties()    
+        # Import the dataset from the provided folder
+        self.import_dataset_properties()  
+        
         self.call_sampler()
+        
         self.generate_images()
 
 
@@ -824,7 +914,7 @@ class MorphShapes_DB_Builder:
 		'''
 		Generates the shape in the canvas based on csv data
 		'''
-
+		
 		area = []
 		area_noise = []
 		
@@ -846,10 +936,9 @@ class MorphShapes_DB_Builder:
 			else:
 				M.setBackgroundImage(background)
 
-			color = self._get_tuple_or_value(
-				row['color'], 
-				[(0, 1),(0, 255)]
-			)
+            # Color 
+			color = row['color'][1:-1]
+			color = tuple(map(int, color.split(', ')))
 
 			sides = row['shape']
 
@@ -877,7 +966,7 @@ class MorphShapes_DB_Builder:
 				[(0, 100), (0, w)]
 			)
 
-			rotation = row['rotation']
+			rotation = row['rotation_(degrees)']
 			morph_percentage = row['deformation']
 
 			M.drawShape(
@@ -931,7 +1020,7 @@ class MorphShapes_DB_Builder:
 			# 
 			filename = self.output_path+"/"+row['ID_image']+".png"
 			M.save(filename)
-			print (filename+" generated.")
+			print(filename+" generated.")
 
 		# 
 		# add the shape area to the data frame
@@ -1114,18 +1203,19 @@ class Shape:
         self._shape_canvas = PIL_Drawing(canvas_side, canvas_side)
 
         # 
-        # if single side shape,
-        # the shape is a circle, else a polygon 
-        # (sides MUST BE 1 or >2)
+        # if sides == 0 the shape is a circle, else (sides >3) 
+        # the shape is a polygon 
+        # (sides MUST BE 0 or >2)
         # 
-        if self._sides == 1:
+        
+        if self._sides == 0:
             self._shape_canvas.circle(
                 self._shape_canvas.center(), 
                 self._radius * self._up_factor, 
                 self._color, 
                 -1
             )
-        else:
+        elif self._sides > 2:
             ptx = self._generate_vertices()
             self._shape_canvas.fillPoly(ptx, self._color)
             # 
@@ -1133,6 +1223,8 @@ class Shape:
             # 
             self._morph()
             self._rotate(anti_aliasing)
+        else:
+            print("Warning: Wrong size definition == 2")
                     
         # 
         # the final image is resized to its original size,
@@ -1321,10 +1413,10 @@ class Shape:
         top = (center[0], center[1] - self._radius * self._up_factor)
         
         # 
-        # if the shape has an even number of sides,
+        # if the shape has an even number of sides, and NOT a circle (0)
         # a pre-rotation is applied
         # 
-        if self._sides % 2 == 0:
+        if (self._sides % 2 == 0) and (self._sides != 0):   
             top = self._rotate_point(top, center, 180 // self._sides)
         
         for i in range(self._sides):
@@ -1363,11 +1455,12 @@ class Main_Surface:
         # 
         # add a shape and draw it in the main canvas
         # 
+        
         shape.draw(anti_aliasing)
 
         cx, cy = shape.center()
         R = shape.radius()
-           
+        
         self._main_surface.paste(
             shape.shape_canvas().image(), 
             (cx - R, cy - R)
