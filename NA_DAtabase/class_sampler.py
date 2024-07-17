@@ -32,7 +32,8 @@ class random_sampler:
                  sampler_properties = None, 
                  dataset_correlation = None,
                  continuous_variables = None,
-                 max_find_another = 10000):
+                 max_find_another = 10000,
+                 gui = None):
         
         '''
         dataset_name = None : name of the dataset.
@@ -145,6 +146,7 @@ class random_sampler:
             
         # Define the maximum amount of resampling:
         self.max_find_another = max_find_another
+        self.gui = gui
             
         
         
@@ -858,7 +860,7 @@ class random_sampler:
         Generate the images from the defined dataset.
         '''
 
-        MDB = MorphShapes_DB_Builder(self.path_save_folder)
+        MDB = MorphShapes_DB_Builder(self.path_save_folder, self.gui)
         
         MDB.generate()
         
@@ -885,7 +887,7 @@ class random_sampler:
         
 #%% Class to generate pictures
 class MorphShapes_DB_Builder:
-	def __init__(self, csv_path):
+	def __init__(self, csv_path, gui = None):
 		''' 
 		Load the data from the given csv_path
 		''' 
@@ -909,7 +911,8 @@ class MorphShapes_DB_Builder:
         
 		self.output_path = image_save_path
 		self.output_csv_filename = path_csv_to_read
-		
+		self.gui = gui
+
 	def generate(self):
 		'''
 		Generates the shape in the canvas based on csv data
@@ -917,6 +920,11 @@ class MorphShapes_DB_Builder:
 		
 		area = []
 		area_noise = []
+		
+		numOfFiles = self.df.shape[0]
+
+		if self.gui != None:
+			self.gui.pb.configure(progress_color="red")
 		
 		for index, row in self.df.iterrows():
 			
@@ -1021,7 +1029,16 @@ class MorphShapes_DB_Builder:
 			filename = self.output_path+"/"+row['ID_image']+".png"
 			M.save(filename)
 			print(filename+" generated.")
+			percentage = index/numOfFiles
+			if self.gui != None:
+				self.gui.pb.set(percentage)
+				self.gui.pbLabel.configure(text="%d%%" % int(percentage*100))
+				self.gui.update()
 
+		if self.gui != None:
+			self.gui.pb.set(1)
+			self.gui.pbLabel.configure(text="100%")
+			
 		# 
 		# add the shape area to the data frame
 		# and save the output csv
