@@ -50,16 +50,18 @@ class ShapesAndColorsMatrix():
 		self._refresh_values()
 		return
 
-	def add_shape(self):
+	def add_shape(self, vertices = None):
 		'''
 		Add a shape in the gui
 		'''
-		dialog = CTkInputDialog(title="Add Shape",text="Enter Vertices (0=circle):")
-		vertices = dialog.get_input();
-		self.parent.focus_force()
-		
 		if vertices == None:
-			return
+			dialog = CTkInputDialog(title="Add Shape",text="Enter Vertices (0=circle):")
+			vertices = dialog.get_input();
+			self.parent.focus_force()
+			
+			if vertices == None:
+				return
+		
 		if vertices.isdigit() and (int(vertices) == 0 or int(vertices) >= 3):
 			if vertices in self.G.shape_order:
 				# if shape already created before then raise error
@@ -116,19 +118,19 @@ class ShapesAndColorsMatrix():
 		self.parent.error_msg("Error: vertices must be 0 for a circle or a number greater than 2.")
 		return
 	
-	def add_color(self):
+	def add_color(self, color_picked = None):
 		'''
 		Add a color in the gui
 		'''
-		color_picked = GUI_MyColorPicker().get() # get the color string
-		self.parent.focus_force()
-		
-		if(color_picked is None):
-			return
-		if color_picked in self.G.color_order:
-			self.parent.error_msg("Error: color %s already present." % color_picked)
-			return
-		
+		if color_picked == None:
+			color_picked = GUI_MyColorPicker().get() # get the color string
+			self.parent.focus_force()
+			
+			if(color_picked is None):
+				return
+			if color_picked in self.G.color_order:
+				self.parent.error_msg("Error: color %s already present." % color_picked)
+				return
 		# create the frame
 		cf = CTkFrame(self.df)
 		
@@ -347,7 +349,7 @@ class ShapesAndColorsMatrix():
 		return	
 			
 
-	def _refresh_values(self):
+	def _refresh_values(self, lock_cells = True):
 		'''
 		refresh all values in cell matrix and probabilities
 		'''
@@ -360,35 +362,38 @@ class ShapesAndColorsMatrix():
 		for i in range(rows):
 			if np.sum(self.G.lock_matrix[i,:]) == cols:
 				EntryHelper.update_value(self.colors[i]['p'], self.G.prob_color[i])
-				self.colors[i]['s'].select()
-				CellHelper.lock_cell(self.colors[i]['p'], self.colors[i]['s'])
+				if lock_cells:
+					self.colors[i]['s'].select()
+					CellHelper.lock_cell(self.colors[i]['p'], self.colors[i]['s'])
 			else:
-				self.colors[i]['s'].deselect()
-				CellHelper.lock_cell(self.colors[i]['p'], self.colors[i]['s'])
+				if lock_cells:
+					self.colors[i]['s'].deselect()
+					CellHelper.lock_cell(self.colors[i]['p'], self.colors[i]['s'])
 				EntryHelper.update_value(self.colors[i]['p'], self.G.prob_color[i])
 				
 		# uodate shape probabilities and lock them in case
 		for j in range(cols):
 			if np.sum(self.G.lock_matrix[:,j]) == rows:
 				EntryHelper.update_value(self.shapes[j]['p'], self.G.prob_shape[j])
-				self.shapes[j]['s'].select()
-				CellHelper.lock_cell(self.shapes[j]['p'], self.shapes[j]['s'])
+				if lock_cells:
+					self.shapes[j]['s'].select()
+					CellHelper.lock_cell(self.shapes[j]['p'], self.shapes[j]['s'])
 			else:
-				self.shapes[j]['s'].deselect()
-				CellHelper.lock_cell(self.shapes[j]['p'], self.shapes[j]['s'])
+				if lock_cells:
+					self.shapes[j]['s'].deselect()
+					CellHelper.lock_cell(self.shapes[j]['p'], self.shapes[j]['s'])
 				EntryHelper.update_value(self.shapes[j]['p'], self.G.prob_shape[j])
 		
-		# update cells
 		for i in range(rows):
 			for j in range(cols):
-
-				if self.G.lock_matrix[i][j]:
-					self.cells[i][j]['s'].select()
-				else:
-					self.cells[i][j]['s'].deselect()
-				
 				EntryHelper.update_value(self.cells[i][j]['e'], self.G.probability_matrix[i][j])
-				CellHelper.lock_cell(self.cells[i][j]['e'], self.cells[i][j]['s'])
+				
+				if lock_cells:
+					if self.G.lock_matrix[i][j]:
+						self.cells[i][j]['s'].select()
+					else:
+						self.cells[i][j]['s'].deselect()
+					CellHelper.lock_cell(self.cells[i][j]['e'], self.cells[i][j]['s'])
 
 		
 		# debug

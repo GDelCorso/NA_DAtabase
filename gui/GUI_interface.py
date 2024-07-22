@@ -235,7 +235,7 @@ class GUI_interface:
         
         
     
-    def modify_cell(self, shape, color, value):
+    def modify_cell(self, shape, color, value, normalize = True):
         '''
         Modify a given cell. Value is the probability value to define in that
         cell.
@@ -254,9 +254,11 @@ class GUI_interface:
             if value + locked_probability <= 1:
                 self.probability_matrix[row_color,col_shape] = \
                                                             max(min(value,1),0)
-                self.lock_matrix[row_color,col_shape] = 1
+                if normalize:
+                    self.lock_matrix[row_color,col_shape] = 1
                 
-        self.normalize()
+        if normalize:
+            self.normalize()
         
         
     

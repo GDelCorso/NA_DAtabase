@@ -6,7 +6,7 @@
 #%% Libraries
 import customtkinter
 import tkinter
-from tkinter import filedialog
+from customtkinter import filedialog
 import NA_DAtabase as NA_D
 import time
 

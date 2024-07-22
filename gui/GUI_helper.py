@@ -27,6 +27,16 @@ class ColorHelper():
 		h = h.lstrip("#")
 		return tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
 
+	def rgbToHEX(rgb):
+		if type(rgb) == str:
+			print("STRING RGB")
+			rgb = rgb[1:-1]
+			rgb = list(map(int,rgb.split(',')))
+
+		red, green, blue = rgb
+		return '#%02x%02x%02x' % (red, green, blue)
+
+
 class EntryHelper():
 
 	def update_value(e, txt):
