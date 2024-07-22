@@ -349,7 +349,7 @@ class GUI_ShapesAndColorsMatrix_interface:
         
         
         
-    def save_data(self):
+    def save_data(self, csv):
         '''
         Save the matrix as a csv file.
         '''
@@ -360,12 +360,12 @@ class GUI_ShapesAndColorsMatrix_interface:
         
         M_shape_colours_prob=pd.DataFrame(self.probability_matrix,\
                                             list(map(ColorHelper.hexToRGB,self.color_order)), self.shape_order)
-        M_shape_colours_prob.to_csv(self.get_save_date_path())
+        M_shape_colours_prob.to_csv(self.get_save_date_path(csv))
 
 
-    def get_save_date_path(self):
+    def get_save_date_path(self, csv):
         return os.path.join(self.get_save_folder(),\
-                                            'shapes_and_colors_matrix.csv')
+                                            csv)
 
     def get_save_folder(self):
         path_data = os.getcwd()

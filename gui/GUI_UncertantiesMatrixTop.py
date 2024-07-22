@@ -237,9 +237,9 @@ class UncertantiesMatrixTop(CTkToplevel):
 			cc_color2 = "*"
 		
 
-		value_to_check = '[%s/%s];[%s/%s]' % (cc_shape1, str(ColorHelper.hexToRGB(cc_color1)), cc_shape2, str(ColorHelper.hexToRGB(cc_color2)))
+		value_to_check = '[%s/%s]%s[%s/%s]' % (cc_shape1, str(ColorHelper.hexToRGB(cc_color1)), TextboxHelper.SEPARATOR, cc_shape2, str(ColorHelper.hexToRGB(cc_color2)))
 
-		value = '%s;%s' % (value_to_check, p.get())
+		value = '%s%s%s' % (value_to_check, TextboxHelper.SEPARATOR, p.get())
 
 		if value_to_check not in map(self.reduce,self.stuff['list']):
 			self.stuff['list'].append(value)

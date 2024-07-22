@@ -48,6 +48,7 @@ class EntryHelper():
 			e.insert(0,txt)
 
 class TextboxHelper():
+	SEPARATOR = ';'
 
 	def update_value(e, txt):
 		'''

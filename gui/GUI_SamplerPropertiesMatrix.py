@@ -14,6 +14,8 @@ from GUI_MyColorPicker import *
 class SamplerPropertiesMatrix():
 	def __init__(self, parent):
 
+		self.csv = 'sampler_properties_matrix.csv'
+
 		self.parent = parent
 
 		self.data = {
@@ -22,7 +24,7 @@ class SamplerPropertiesMatrix():
 			'random_seed': StringVar(),
 			'resolution': StringVar(),
 			'background_color': StringVar(),
-			'oob': StringVar(),
+			'out_of_border': StringVar(),
 			'correlation': StringVar(),
 			'cc': {
 				'shape': StringVar(),
@@ -76,20 +78,20 @@ class SamplerPropertiesMatrix():
 		
 		CTkLabel(lf, text='Background Color:', anchor="e").grid(row=4, column=0, padx=5, pady=5, sticky='we')
 		
-		background_color_value = CTkButton(lf, text='#000000', fg_color='#000000', hover=False)
-		background_color_value.configure(command=lambda: self.pick_color(background_color_value))
-		background_color_value.grid(row=4, column=1, padx=5, sticky='we')
+		self.background_color_value = CTkButton(lf, text='#000000', fg_color='#000000', hover=False)
+		self.background_color_value.configure(command=lambda: self.pick_color(self.background_color_value))
+		self.background_color_value.grid(row=4, column=1, padx=5, sticky='we')
 		black = str(ColorHelper.hexToRGB("#000000"))
 		self.data['background_color'].set(black)
 
 		CTkLabel(lf, text='Allow Out Of Border:', anchor="e").grid(row=5, column=0, padx=5, pady=5, sticky='we')
-		c=CTkCheckBox(lf, text="", variable=self.data['oob'],command=lambda: self.mc())
-		c.deselect()
-		c.grid(row=5, column=1, padx=5, sticky='we')
+		self.c = CTkCheckBox(lf, text="", variable=self.data['out_of_border'],command=lambda: self.mc())
+		self.c.deselect()
+		self.c.grid(row=5, column=1, padx=5, sticky='we')
 		
 		CTkLabel(lf, text='Correlation:', anchor="e").grid(row=6, column=0, padx=5, pady=5, sticky='we')
-		cor = CTkComboBox(lf, values=["Kendal","Spearman"], variable=self.data['correlation'], state="readonly")
-		cor.set("Kendal")
+		cor = CTkComboBox(lf, values=["Spearman"], variable=self.data['correlation'], state="readonly")
+		cor.set("Spearman")
 		cor.grid(row=6, column=1, padx=5, sticky='we')
 
 		rf = CTkFrame(tab)
@@ -117,7 +119,7 @@ class SamplerPropertiesMatrix():
 		'''
 		
 	def mc(self):
-		if self.data['oob'].get() == '1':
+		if self.data['out_of_border'].get() == '1':
 			self.lds.configure(state="readonly")
 		else:
 			self.lds.set("MC")
@@ -209,12 +211,13 @@ class SamplerPropertiesMatrix():
 			self.list1.append(value)
 		else:
 			self.parent.error_msg('%s already present in list.' % value)
-			
-		TextboxHelper.update_value(self.cc_textbox, "[%s]" % ', '.join(self.list1))
-		print(self.list1)
 		
+		self.update_textbox()	
 		return
 
+	def update_textbox(self):
+		TextboxHelper.update_value(self.cc_textbox, "[%s]" % TextboxHelper.SEPARATOR.join(self.list1))
+		
 	def reset_cc(self):
 		self.list1 = [];
 		TextboxHelper.update_value(self.cc_textbox, "")
@@ -224,12 +227,13 @@ class SamplerPropertiesMatrix():
 		array = array.split(";")
 		return "%s;%s" % (array[0],array[1])
 
-	def pick_color(self, btn):
-		color = GUI_MyColorPicker().get()
+	def pick_color(self, btn, color = None):
 		if color == None:
-			return
+			color = GUI_MyColorPicker().get()
+			if color == None:
+				return
 		btn.configure(text=color, fg_color=color, text_color=ColorHelper.getTextColor(color))
-		self.data['background_color'].set(color)
+		self.data['background_color'].set(ColorHelper.hexToRGB(color))
 
 	def save(self, db_name):
 		rows = len(self.list1)
@@ -252,7 +256,7 @@ class SamplerPropertiesMatrix():
 			csvdata[0][4] = int(self.data['resolution'].get())
 			csvdata[0][5] = self.list1[0] if len(self.list1) else None
 			csvdata[0][6] = bg_color
-			csvdata[0][7] = True if self.data['oob'].get() == '1' else False 
+			csvdata[0][7] = True if self.data['out_of_border'].get() == '1' else False 
 			
 			csvdata[0][8] = self.data['correlation'].get()
 			
@@ -264,12 +268,33 @@ class SamplerPropertiesMatrix():
 			path_data = os.getcwd()
 			path_data = os.path.join(path_data, db_name)
 
-			filename = os.path.join(path_data, 'sampler_properties_matrix.csv')
+			filename = os.path.join(path_data, self.csv)
 			pd.DataFrame(csvdata, columns=head).to_csv(filename, index=False)
 
 		except:
-			msg = "Unable to save sampler_properties_matrix.csv"
+			msg = "Unable to save %s" % self.csv
 			self.parent.error_msg(msg)
 			return False
 
 		return True
+
+	def load(self):
+		sp = (pd.read_csv('../example_database_1/%s' % self.csv)).to_dict()
+		for x in sp:
+			if x == 'pixel_resolution_x' or x == 'pixel_resolution_y':
+				self.data['resolution'].set(sp[x][0])
+			elif x == 'correct_classes':
+				# TODO
+				self.list1 = sp[x][0].split(TextboxHelper.SEPARATOR)
+				self.update_textbox()
+			elif x == 'out_of_border' and sp[x][0]:
+				self.data[x].set(1)
+				self.c.select()
+				self.mc()
+			else:
+				self.data[x].set(sp[x][0])
+				if x == 'background_color':
+					self.pick_color(self.background_color_value, ColorHelper.rgbToHEX(sp[x][0]))
+
+		print (self.data, self.list1)
+

@@ -114,27 +114,8 @@ class App(CTk):
 		self.load()
 
 	def load(self):
-		sac = pd.read_csv('../example_database_1/shapes_and_colors_matrix.csv')
-
-		shapes = (list(sac.columns)[1:])
-		colors = (list(map(ColorHelper.rgbToHEX,sac[sac.columns[0]])))
-
-		for shape in shapes:
-			self.ShapesAndColorsMatrix.add_shape(shape)
-		for color in colors:
-			self.ShapesAndColorsMatrix.add_color(color)
-
-		probabilities = sac.to_numpy()[:,1:]
-		pc, ps = probabilities.shape
-		
-		for pci in range(pc):
-			for psi in range (ps):
-				shape = shapes[psi]
-				color = colors[pci]
-				self.ShapesAndColorsMatrix.G.modify_cell(shape, color, probabilities[pci][psi])
-				
-		self.ShapesAndColorsMatrix._refresh_values(False)
-
+		self.ShapesAndColorsMatrix.load()
+		self.SamplerPropertiesMatrix.load()
 		
 	def save(self):
 		'''

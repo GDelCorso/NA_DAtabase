@@ -13,6 +13,9 @@ from GUI_MyColorPicker import *
 
 class ShapesAndColorsMatrix():
 	def __init__(self, parent):
+
+		self.csv = 'shapes_and_colors_matrix.csv'
+
 		self.parent = parent
 
 		# list of shape's p cells
@@ -178,14 +181,36 @@ class ShapesAndColorsMatrix():
 		#print (self.G.prob_color)
 		#print (self.G.probability_matrix)
 		try:
-			self.G.save_data()
+			self.G.save_data(self.csv)
 		except:
-			msg = "Unable to save shapes_and_colors_matrix.csv"
+			msg = "Unable to save %s" % self.csv
 			self.parent.error_msg(msg)
 			return False
 			
 		return True
 
+	def load(self):
+		sac = pd.read_csv('../example_database_1/%s' % self.csv)
+
+		shapes = (list(sac.columns)[1:])
+		colors = (list(map(ColorHelper.rgbToHEX,sac[sac.columns[0]])))
+
+		for shape in shapes:
+			self.add_shape(shape)
+		for color in colors:
+			self.add_color(color)
+
+		probabilities = sac.to_numpy()[:,1:]
+		pc, ps = probabilities.shape
+		
+		for pci in range(pc):
+			for psi in range (ps):
+				shape = shapes[psi]
+				color = colors[pci]
+				self.G.modify_cell(shape, color, probabilities[pci][psi])
+				
+		self._refresh_values(False)
+		
 	def reset(self):
 		self.G.reset()
 
