@@ -23,6 +23,9 @@ class ContinuousDistributionMatrix():
 	]
 
 	def __init__(self, parent):
+
+		self.csv = 'continuous_distribution_matrix.csv'
+
 		self.parent = parent
 		
 		# variables storing last value and last position
@@ -30,7 +33,8 @@ class ContinuousDistributionMatrix():
 		self._coords = (0, 0)
 			
 		self.entries = np.empty((len(self.continuous_variables), len(ContinuousVariableHelper.index)), dtype=object)
-		
+		self.cbox = []
+
 		self.default_values = {
 			'centre_x': {
 				'cbox': 'uniform',
@@ -106,6 +110,8 @@ class ContinuousDistributionMatrix():
 			cb.set(self.default_values[what]['cbox'])
 			self.lock(self.default_values[what]['cbox'], row-1)
 
+		self.cbox.append(cb)
+
 	def error(self, e, msg):
 		EntryHelper.update_value(e,self._last_value)
 		self.parent.error_msg(msg)
@@ -168,18 +174,16 @@ class ContinuousDistributionMatrix():
 			CellHelper.lock_cell(cell, s, delete=True)
 		
 	def save(self, db_name):
-		'''
 		errors = False
 		for row in range(self.entries.shape[0]):
-			min_value, max_value = self._min_max(self.continuous_variables[row])
 			for col in range(self.entries.shape[1]):
-				e = self.entries[i][j]
-				if e.cget('state') == 'normal' and self.check(row, col, min_value, max_value) == False:
+				e = self.entries[row][col]
+				if e.cget('state') == 'normal' and e.get().strip() == '':
 					errors = True
 
 		if errors:
-			return False
-		'''
+			return self._throw_error()
+		
 		i,j = self._coords
 		min_value, max_value = self._min_max(self.continuous_variables[i])
 		e = self.entries[i][j]
@@ -191,18 +195,43 @@ class ContinuousDistributionMatrix():
 			csvdata = np.transpose(csvdata)
 			path_data = os.getcwd()
 			path_data = os.path.join(path_data, db_name)
-			filename = os.path.join(path_data, 'continuous_distribution_matrix.csv')
+			filename = os.path.join(path_data, self.csv)
 			#print(filename)
 			df = pd.DataFrame(csvdata, index=ContinuousVariableHelper.index, columns=self.continuous_variables)
 			df.to_csv(filename)
 		except:
-			msg = "Unable to save continuous_distribution_matrix.csv"
-			self.parent.error_msg(msg)
-			return False
+			
+			return self._throw_error()
 
 		return True
 
+	def load(self, path):
+		cd = pd.read_csv('%s/%s' % (path, self.csv))
+		for i in range(len(self.continuous_variables)):
+			l = cd[self.continuous_variables[i]].tolist()
+			self.lock(self._get_cbox_value(l), i)
+			for j in range(len(l)):
+				e = self.entries[i][j]
+				EntryHelper.update_value(e,l[j] if np.isnan(l[j]) else int(l[j]))
 	
+	def _get_cbox_value(self, l):
+		if np.isnan(l[0]) and np.isnan(l[2]) and np.isnan(l[3]):
+			return 'constant'
+
+		if np.isnan(l[0]) and np.isnan(l[3]):
+			return 'gaussian'
+
+		if np.isnan(l[1]) and np.isnan(l[2]):
+			return 'uniform'
+		
+		return 'truncated_gaussian'
+
+
+	def _throw_error(self):
+		msg = "Unable to save %s" % self.csv
+		self.parent.error_msg(msg)
+		return False
+			
 	def _entry(self, master, row, i, what):
 		e = CTkEntry(master, fg_color="#000", justify="center")
 		e.bind('<FocusIn>', lambda evt: self._set_last_value(e.get(),row-1, i))

@@ -17,8 +17,11 @@ class MultivariateDistributionMatrix():
 	oob = -2
 
 	def __init__(self, parent):
-		self.parent = parent
 		
+		self.csv = 'multivariate_distribution_matrix.csv'
+
+		self.parent = parent
+
 		self.G = None
 		self.d_matrix = np.empty((0,0), dtype=object)
 		self.cells = np.array([[]])
@@ -117,6 +120,7 @@ class MultivariateDistributionMatrix():
 						self.d_matrix[row[ci]][col[ci]][i][j] = matrix[i][j] if matrix[i][j] != self.oob else self.d_matrix[row[ci]][col[ci]][i][j]
 		else:
 			self.d_matrix[row][col] = matrix.copy()
+		
 		self._checked()
 		#print(self.d_matrix)
 		'''
@@ -144,10 +148,23 @@ class MultivariateDistributionMatrix():
 		df = pd.DataFrame(csvdata, index=index, columns=columns)
 		path_data = os.getcwd()
 		path_data = os.path.join(path_data, db_name)
-		filename = os.path.join(path_data, 'multivariate_distribution_matrix.csv')
+		filename = os.path.join(path_data, self.csv)
 		#print(filename)
 		df.to_csv(filename)
 		return True
+
+	def load(self, path):
+		md = (pd.read_csv('%s/%s' % (path, self.csv)))
+		m = md.to_numpy()[:,1:]
+		
+		step = len(ContinuousDistributionMatrix.continuous_variables)
+		colors = len(self.G.color_order)
+		shapes = len(self.G.shape_order)
+
+		for i in range(colors):
+			for j in range(shapes):
+				tm = np.array(m[i*step:i*step+step,j*step:j*step+step], dtype=float)
+				self.d_matrix[i][j] = tm
 
 	def _empty_cell_matrix(self):
 		l = len(ContinuousDistributionMatrix.continuous_variables)

@@ -139,7 +139,7 @@ class SamplerPropertiesMatrix():
 
 	def v_float(self, e):
 		value = e.get().strip()
-		print (value)
+		
 		if len(value) == 0:
 			return
 		try:
@@ -216,6 +216,7 @@ class SamplerPropertiesMatrix():
 		return
 
 	def update_textbox(self):
+		print (self.list1)
 		TextboxHelper.update_value(self.cc_textbox, "[%s]" % TextboxHelper.SEPARATOR.join(self.list1))
 		
 	def reset_cc(self):
@@ -278,15 +279,16 @@ class SamplerPropertiesMatrix():
 
 		return True
 
-	def load(self):
-		sp = (pd.read_csv('../example_database_1/%s' % self.csv)).to_dict()
+	def load(self, path):
+		sp = (pd.read_csv('%s/%s' % (path, self.csv))).to_dict()
+
 		for x in sp:
 			if x == 'pixel_resolution_x' or x == 'pixel_resolution_y':
 				self.data['resolution'].set(sp[x][0])
 			elif x == 'correct_classes':
 				# TODO
 				
-				self.list1 = sp[x].values()
+				self.list1 = list(sp[x].values())
 				self.update_textbox()
 			elif x == 'out_of_border' and sp[x][0]:
 				self.data[x].set(1)
@@ -297,5 +299,5 @@ class SamplerPropertiesMatrix():
 				if x == 'background_color':
 					self.pick_color(self.background_color_value, ColorHelper.rgbToHEX(sp[x][0]))
 
-		print (self.data, self.list1)
+		
 

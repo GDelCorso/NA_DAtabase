@@ -113,10 +113,6 @@ class App(CTk):
 		self.ShapesAndColorsMatrix.init_G(self.db_name)
 		self.load()
 
-	def load(self):
-		self.ShapesAndColorsMatrix.load()
-		self.SamplerPropertiesMatrix.load()
-		
 	def save(self):
 		'''
 		save all csv data
@@ -128,6 +124,14 @@ class App(CTk):
 			self.UncertantiesMatrix.save(self.db_name):
 			self.success_msg("Data successfully saved in folder %s" % self.db_name, True)
 
+	def load(self):
+		path = '../example_database_1'
+		
+		self.ShapesAndColorsMatrix.load(path)
+		self.SamplerPropertiesMatrix.load(path)
+		self.ContinuousDistributionMatrix.load(path)
+		self.MultivariateDistributionMatrix.load(path)
+		
 	def success_msg(self, msg, alert=False):
 		'''
 		show a success message on message box

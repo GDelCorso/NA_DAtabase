@@ -29,7 +29,6 @@ class ColorHelper():
 
 	def rgbToHEX(rgb):
 		if type(rgb) == str:
-			print("STRING RGB")
 			rgb = rgb[1:-1]
 			rgb = list(map(int,rgb.split(',')))
 

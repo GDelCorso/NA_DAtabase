@@ -189,8 +189,8 @@ class ShapesAndColorsMatrix():
 			
 		return True
 
-	def load(self):
-		sac = pd.read_csv('../example_database_1/%s' % self.csv)
+	def load(self, path):
+		sac = pd.read_csv('%s/%s' % (path, self.csv))
 
 		shapes = (list(sac.columns)[1:])
 		colors = (list(map(ColorHelper.rgbToHEX,sac[sac.columns[0]])))
@@ -328,7 +328,6 @@ class ShapesAndColorsMatrix():
 
 	def _set_last_value(self, value):
 		self._last_value = float(value)
-		print(self._last_value)
 
 	def _update_cell(self, e):
 		'''
@@ -422,9 +421,9 @@ class ShapesAndColorsMatrix():
 
 		
 		# debug
-		print (self.G.prob_shape)	
-		print (self.G.prob_color)	
-		print (self.G.probability_matrix)	
+		#print (self.G.prob_shape)	
+		#print (self.G.prob_color)	
+		#print (self.G.probability_matrix)	
 
 		#update other matrix
 		self.parent.SamplerPropertiesMatrix.update(self.G)
