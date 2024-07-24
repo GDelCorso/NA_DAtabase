@@ -125,6 +125,7 @@ class App(CTk):
 			self.success_msg("Data successfully saved in folder %s" % self.db_name, True)
 
 	def load(self):
+		return
 		path = '../example_database_1'
 		
 		self.ShapesAndColorsMatrix.load(path)
