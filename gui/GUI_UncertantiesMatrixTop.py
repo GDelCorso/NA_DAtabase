@@ -287,7 +287,7 @@ class UncertantiesMatrixTop(CTkToplevel):
 		self.reset_cn()
 		self.reset_distribution()
 		
-		self.stuff = stuff
+		self.stuff = stuff.copy()
 		
 		self.row = row
 		self.col = col
