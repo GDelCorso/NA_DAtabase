@@ -285,7 +285,8 @@ class SamplerPropertiesMatrix():
 				self.data['resolution'].set(sp[x][0])
 			elif x == 'correct_classes':
 				# TODO
-				self.list1 = sp[x][0].split(TextboxHelper.SEPARATOR)
+				
+				self.list1 = sp[x].values()
 				self.update_textbox()
 			elif x == 'out_of_border' and sp[x][0]:
 				self.data[x].set(1)
