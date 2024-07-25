@@ -110,6 +110,18 @@ class ContinuousVariableHelper():
 		# and uppercase every word
 		return txt.title().replace("_", " ")
 
+	def get_cbox_value(l):
+		if l[0] == '' and l[2] == '' and l[3] == '':
+			return 'constant'
+
+		if l[0] == '' and l[3] == '':
+			return 'gaussian'
+
+		if l[1] == '' and l[2] == '':
+			return 'uniform'
+		
+		return 'truncated_gaussian'
+
 	@classmethod
 	def P_INF(cls):
 		# return positive infinite value as string

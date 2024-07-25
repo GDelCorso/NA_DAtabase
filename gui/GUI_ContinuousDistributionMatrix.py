@@ -206,27 +206,15 @@ class ContinuousDistributionMatrix():
 		return True
 
 	def load(self, path):
-		cd = pd.read_csv('%s/%s' % (path, self.csv))
+		cd = pd.read_csv('%s/%s' % (path, self.csv), dtype=object).fillna('')
+		print(cd)
 		for i in range(len(self.continuous_variables)):
 			l = cd[self.continuous_variables[i]].tolist()
-			self.lock(self._get_cbox_value(l), i)
+			self.lock(ContinuousVariableHelper.get_cbox_value(l), i)
 			for j in range(len(l)):
 				e = self.entries[i][j]
-				EntryHelper.update_value(e,l[j] if np.isnan(l[j]) else int(l[j]))
+				EntryHelper.update_value(e,str(l[j]).replace("inf", ContinuousVariableHelper.infinity,))
 	
-	def _get_cbox_value(self, l):
-		if np.isnan(l[0]) and np.isnan(l[2]) and np.isnan(l[3]):
-			return 'constant'
-
-		if np.isnan(l[0]) and np.isnan(l[3]):
-			return 'gaussian'
-
-		if np.isnan(l[1]) and np.isnan(l[2]):
-			return 'uniform'
-		
-		return 'truncated_gaussian'
-
-
 	def _throw_error(self):
 		msg = "Unable to save %s" % self.csv
 		self.parent.error_msg(msg)

@@ -125,13 +125,13 @@ class App(CTk):
 			self.success_msg("Data successfully saved in folder %s" % self.db_name, True)
 
 	def load(self):
-		return
 		path = '../example_database_1'
 		
 		self.ShapesAndColorsMatrix.load(path)
 		self.SamplerPropertiesMatrix.load(path)
 		self.ContinuousDistributionMatrix.load(path)
 		self.MultivariateDistributionMatrix.load(path)
+		self.UncertantiesMatrix.load(path)
 		
 	def success_msg(self, msg, alert=False):
 		'''

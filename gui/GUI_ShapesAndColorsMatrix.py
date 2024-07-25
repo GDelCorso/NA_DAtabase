@@ -201,12 +201,9 @@ class ShapesAndColorsMatrix():
 			self.add_color(color)
 
 		probabilities = sac.to_numpy()[:,1:]
-		pc, ps = probabilities.shape
 		
-		for pci in range(pc):
-			for psi in range (ps):
-				shape = shapes[psi]
-				color = colors[pci]
+		for pci,color in enumerate(colors):
+			for psi, shape in enumerate(shapes):
 				self.G.modify_cell(shape, color, probabilities[pci][psi])
 				
 		self._refresh_values(False)

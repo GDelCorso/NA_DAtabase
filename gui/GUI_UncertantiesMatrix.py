@@ -25,6 +25,10 @@ class UncertantiesMatrix():
 	oob = -2
 
 	def __init__(self, parent):
+
+		self.csv_cn = "uncertanties_classification_noise_%s_%s.csv"
+		self.csv_dm = "uncertanties_distribution_matrix_%s_%s.csv"
+
 		self.parent = parent
 
 		self.G = None
@@ -126,18 +130,20 @@ class UncertantiesMatrix():
 	
 
 	def _map_color(self, hex):
+		'''
 		rgb = str(ColorHelper.hexToRGB(hex))
-		rgb = rgb.replace("(","")
-		rgb = rgb.replace(")","")
+		rgb = rgb.strip("()")
 		rgb = rgb.replace(",","-")
 		rgb = rgb.replace(" ","")
+		'''
+		rgb = '-'.join(str(x) for x in ColorHelper.hexToRGB(hex))
 		return rgb
 
 	def save(self, db_name):
 		try:
 			colors = list(map(self._map_color, self.G.color_order))
 		except:
-			return True
+			return False
 		
 		for ci in range(self.u_matrix.shape[0]):
 			for si in range(self.u_matrix.shape[1]):
@@ -150,7 +156,7 @@ class UncertantiesMatrix():
 				path_data = os.getcwd()
 				path_data = os.path.join(path_data, db_name)
 				
-				filename = "uncertanties_distribution_matrix_%s_%s.csv" % ( self.G.shape_order[si], colors[ci])
+				filename = self.csv_dm % ( self.G.shape_order[si], colors[ci])
 				filename = os.path.join(path_data, filename)
 				
 				try:
@@ -175,7 +181,7 @@ class UncertantiesMatrix():
 				path_data = os.getcwd()
 				path_data = os.path.join(path_data, db_name)
 				
-				filename = "uncertanties_classification_noise_%s_%s.csv" % ( self.G.shape_order[si], colors[ci])
+				filename = self.csv_cn % ( self.G.shape_order[si], colors[ci])
 				filename = os.path.join(path_data, filename)
 				
 				try:
@@ -186,7 +192,30 @@ class UncertantiesMatrix():
 					return False	
 
 		return True
-		
+	
+	def load(self, path):
+		for ci, c in enumerate(self.G.color_order):
+			for si, s in enumerate(self.G.shape_order):
+				color = self._map_color(c)
+				ucn = pd.read_csv('%s/%s' % (path, self.csv_cn % (s, color)))['classification_noise'].tolist()
+				udm = pd.read_csv('%s/%s' % (path, self.csv_dm % (s, color)), dtype=object).fillna('')
+				entries = np.empty((len(self.continuous_variables), len(ContinuousVariableHelper.index)), dtype=object)
+				entries.fill('')
+				
+				cbox = []
+				for cvi, cv in enumerate(self.continuous_variables):
+					
+					l = [str(x).replace("inf", ContinuousVariableHelper.infinity) for x in udm[cv].tolist()]
+					cbox.append(ContinuousVariableHelper.get_cbox_value(udm[cv].tolist()))
+					for li, udl in enumerate(l):
+						entries[cvi][li] = udl
+
+				self.u_matrix[ci][si]['list'] = ucn
+				self.u_matrix[ci][si]['cbox'] = cbox
+				self.u_matrix[ci][si]['entries'] = entries
+				
+		return
+
 	def _add_cells(self,what):
 		'''
 		Add a row/column of cells
@@ -245,5 +274,3 @@ class UncertantiesMatrix():
 
 	def _mod_matrix(self, row, col):
 		self.UncertantiesMatrixTop.modify(self.u_matrix[row][col], row, col)
-		
-
