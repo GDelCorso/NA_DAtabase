@@ -2,7 +2,6 @@
 # python import
 import re
 import numpy as np
-from os import sys
 
 # custom tkinter import
 from customtkinter import *
@@ -110,17 +109,23 @@ class App(CTk):
 
 		if(self.db_name is None):
 			self.destroy()
-			sys.exit(0)
+			os.sys.exit(0)
 
 		self.db_name = self.db_name.strip()
 
 		if(len(self.db_name) == 0):
 			self.destroy()
-			sys.exit(0)
+			os.sys.exit(0)
+
+		if(os.path.exists(os.path.join(PathHelper.get_db_path(), self.db_name))):
+			self.error_msg("Warning, database %s already exists!" % self.db_name)
+			return False
 
 		self.init()
+		return True
 
 	def init(self):
+		self.message_box.configure(text='')
 		self.title(self.titleString + " - " + self.db_name)
 		self.ShapesAndColorsMatrix.init_G(self.db_name)
 		
