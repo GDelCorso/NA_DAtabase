@@ -2,6 +2,8 @@
 # python import
 import re
 import numpy as np
+import sys
+sys.path.append('../')
 
 # custom tkinter import
 from customtkinter import *
@@ -16,6 +18,8 @@ from GUI_SamplerPropertiesMatrix import *
 from GUI_UncertantiesMatrix import *
 from GUI_ContinuousDistributionMatrix import *
 from GUI_MultivariateDistributionMatrix import *
+
+import NA_DAtabase as NA_D
 
 class App(CTk):
 	'''
@@ -47,18 +51,29 @@ class App(CTk):
 		bf = CTkFrame(self)
 		bf.grid(row=0, column=0, padx=10,sticky="we")
 		
-		bf.grid_columnconfigure(2, weight=1)
+		bf.grid_columnconfigure(4, weight=1)
 		
 		# add button to show tab info
-		CTkButton(bf, text='Tab info', command=self.info, width=1).grid(row=0, column=0, pady=10, padx=5)
+		self.tabinfo = CTkButton(bf, text='Tab info', command=self.info, width=1)
+		self.tabinfo.grid(row=0, column=0, pady=10, padx=5)
 		
 		# add button to save all csv files
 		self.save = CTkButton(bf, text='Save Database', command=self.save)
 		self.save.grid(row=0, column=1, pady=10)
 		
-		self.message_box = CTkLabel(bf, bg_color="#222", anchor="w", text="")
-		self.message_box.grid(row=0, column=2, padx=10, sticky="ew")
+		# add button to generate the images
+		self.generate = CTkButton(bf, text='Generate Images', fg_color="#060", hover_color="#080", state="disabled", command=self.generate_images)
+		self.generate.grid(row=0, column=2, pady=10, padx=5)
 		
+		self.message_box = CTkLabel(bf, bg_color="#222", anchor="w", text="")
+		self.message_box.grid(row=0, column=3, columnspan=2,padx=10, sticky="ew")
+		
+		self.pbLabel = CTkLabel(bf, text="")
+		self.pb = CTkProgressBar(bf, fg_color="gray", progress_color="gray")
+		self.pb.set(0)
+		
+		
+
 		# create the tab view
 		self.tabview = CTkTabview(master=self)
 		self.tabview.add("Shapes and Colors")
@@ -108,8 +123,7 @@ class App(CTk):
 		self.focus_force()
 
 		if(self.db_name is None):
-			self.destroy()
-			os.sys.exit(0)
+			return False
 
 		self.db_name = self.db_name.strip()
 
@@ -139,6 +153,31 @@ class App(CTk):
 			self.MultivariateDistributionMatrix.save(self.db_name) and \
 			self.UncertantiesMatrix.save(self.db_name):
 			self.success_msg("Data successfully saved in folder %s" % self.db_name, True)
+			self.generate.configure(state="normal")
+			
+	def generate_images(self):
+		self.pbLabel.grid(row=0, column=3, padx=5)
+		self.pb.grid(row=0, column=4, padx=15, sticky="ew")
+
+		self.tabinfo.configure(state="disabled")
+		self.save.configure(state="disabled")
+		self.generate.configure(state="disabled")
+		self.message_box.grid_forget()
+		self.tabview.grid_forget()
+		
+		NA_D.random_sampler(give_full_path=self.ShapesAndColorsMatrix.G.get_save_folder(), gui=self).auto_process()
+		self.success_msg("Images created successfully", True)
+		
+		self.pbLabel.grid_forget()
+		self.pb.grid_forget()
+
+		self.tabinfo.configure(state="normal")
+		self.save.configure(state="normal")
+		self.generate.configure(state="normal")
+		self.tabview.grid(row=1, column=0, padx=10, pady=5, sticky="nswe")
+		self.message_box.grid(row=0, column=3, columnspan=2, padx=10, sticky="ew")
+		
+		return
 
 	def load(self, db_name):
 		self.db_name = db_name
