@@ -41,7 +41,7 @@ class GUI_ShapesAndColorsMatrix_interface:
         self.prob_shape = []    # Prob shape
         self.prob_color = []    # Prob color
         
-        print("%s initialized" % dataset_name)
+        # print("%s initialized" % dataset_name)
         
         
     
@@ -368,5 +368,6 @@ class GUI_ShapesAndColorsMatrix_interface:
                                             csv)
 
     def get_save_folder(self):
-        path_data = os.getcwd()
-        return os.path.join(path_data, self.dataset_name)
+        #path_data = os.getcwd()
+        #return os.path.join(path_data, self.dataset_name)
+        return os.path.join(PathHelper.get_db_path(), self.dataset_name)

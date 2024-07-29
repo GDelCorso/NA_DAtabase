@@ -1,5 +1,6 @@
 # custom tkinter import
 from customtkinter import END
+import os
 
 class ColorHelper():
 	'''
@@ -132,5 +133,11 @@ class ContinuousVariableHelper():
 		# return negative infinite value as string
 		return '-%s' % cls.infinity
 				
-
+class PathHelper:
+	def get_db_path():
+		file_path =  (os.path.dirname(__file__))
+		os.chdir(file_path)
+		os.chdir("..")
+		os.chdir("output")
+		return os.getcwd()
 

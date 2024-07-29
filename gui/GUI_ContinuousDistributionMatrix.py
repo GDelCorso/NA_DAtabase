@@ -193,7 +193,7 @@ class ContinuousDistributionMatrix():
 		try:
 			csvdata = [[e.get().replace(ContinuousVariableHelper.infinity, "inf") for e in sub] for sub in self.entries]
 			csvdata = np.transpose(csvdata)
-			path_data = os.getcwd()
+			path_data = PathHelper.get_db_path()
 			path_data = os.path.join(path_data, db_name)
 			filename = os.path.join(path_data, self.csv)
 			#print(filename)
@@ -206,8 +206,8 @@ class ContinuousDistributionMatrix():
 		return True
 
 	def load(self, path):
-		cd = pd.read_csv('%s/%s' % (path, self.csv), dtype=object).fillna('')
-		print(cd)
+		cd = pd.read_csv(os.path.join(path, self.csv), dtype=object).fillna('')
+		# print(cd)
 		for i in range(len(self.continuous_variables)):
 			l = cd[self.continuous_variables[i]].tolist()
 			self.lock(ContinuousVariableHelper.get_cbox_value(l), i)

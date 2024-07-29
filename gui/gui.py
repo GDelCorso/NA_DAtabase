@@ -11,7 +11,7 @@ import tkinter.messagebox as tkmb
 
 #internal import 
 from GUI_helper import *
-from GUI_preset import *
+from GUI_loader import *
 from GUI_ShapesAndColorsMatrix import *
 from GUI_SamplerPropertiesMatrix import *
 from GUI_UncertantiesMatrix import *
@@ -36,6 +36,7 @@ class App(CTk):
 
 	def __init__(self):
 		super().__init__()
+		self.withdraw()
 		# initialize the window		
 		
 		self.titleString = "NA Database Configurator"
@@ -76,12 +77,20 @@ class App(CTk):
 		self.MultivariateDistributionMatrix = MultivariateDistributionMatrix(self)
 		self.ShapesAndColorsMatrix = ShapesAndColorsMatrix(self)
 		
-		self.focus_force()
+		
+		#self.load("example_database_1")
 
 		# ask for db name 
-		self.ask_db_name()
+		#self.ask_db_name()
+
 		# TODO: shows choose-preset window
 		# self.PresetWindow = PresetWindow(self)
+		lw = LoaderWindow(self)
+		
+		#self.deiconify()
+		#self.focus_force()
+
+
 		self.mainloop()
 
 	def info(self):
@@ -109,10 +118,12 @@ class App(CTk):
 			self.destroy()
 			sys.exit(0)
 
+		self.init()
+
+	def init(self):
 		self.title(self.titleString + " - " + self.db_name)
 		self.ShapesAndColorsMatrix.init_G(self.db_name)
-		self.load()
-
+		
 	def save(self):
 		'''
 		save all csv data
@@ -124,9 +135,13 @@ class App(CTk):
 			self.UncertantiesMatrix.save(self.db_name):
 			self.success_msg("Data successfully saved in folder %s" % self.db_name, True)
 
-	def load(self):
-		path = '../example_database_1'
+	def load(self, db_name):
+		self.db_name = db_name
 		
+		self.init()
+		
+		path = os.path.join(PathHelper.get_db_path(), self.db_name)
+
 		self.ShapesAndColorsMatrix.load(path)
 		self.SamplerPropertiesMatrix.load(path)
 		self.ContinuousDistributionMatrix.load(path)

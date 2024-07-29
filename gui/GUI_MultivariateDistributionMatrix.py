@@ -154,7 +154,7 @@ class MultivariateDistributionMatrix():
 		return True
 
 	def load(self, path):
-		md = (pd.read_csv('%s/%s' % (path, self.csv)))
+		md = (pd.read_csv(os.path.join(path, self.csv)))
 		m = md.to_numpy()[:,1:]
 		
 		step = len(ContinuousDistributionMatrix.continuous_variables)

@@ -51,7 +51,7 @@ class MultivariateDistributionMatrixTop(CTkToplevel):
 		self.withdraw()
 
 	def modify(self, d_matrix, row, col, multiple=False):
-		print(d_matrix)
+		# print(d_matrix)
 		self.d_matrix = d_matrix
 		self.row = row
 		self.col = col

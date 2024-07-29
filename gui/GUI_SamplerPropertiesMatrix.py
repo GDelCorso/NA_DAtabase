@@ -216,7 +216,7 @@ class SamplerPropertiesMatrix():
 		return
 
 	def update_textbox(self):
-		print (self.list1)
+		# print (self.list1)
 		TextboxHelper.update_value(self.cc_textbox, "[%s]" % TextboxHelper.SEPARATOR.join(self.list1))
 		
 	def reset_cc(self):
@@ -280,7 +280,7 @@ class SamplerPropertiesMatrix():
 		return True
 
 	def load(self, path):
-		sp = (pd.read_csv('%s/%s' % (path, self.csv))).to_dict()
+		sp = (pd.read_csv(os.path.join(path, self.csv))).to_dict()
 
 		for x in sp:
 			if x == 'pixel_resolution_x' or x == 'pixel_resolution_y':

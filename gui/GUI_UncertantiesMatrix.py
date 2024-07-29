@@ -90,7 +90,7 @@ class UncertantiesMatrix():
 		return    
 
 	def update(self,G):
-		print("Updating");
+		# print("Updating");
 		
 		self.UncertantiesMatrixTop.update(G);
 
@@ -197,8 +197,8 @@ class UncertantiesMatrix():
 		for ci, c in enumerate(self.G.color_order):
 			for si, s in enumerate(self.G.shape_order):
 				color = self._map_color(c)
-				ucn = pd.read_csv('%s/%s' % (path, self.csv_cn % (s, color)))['classification_noise'].tolist()
-				udm = pd.read_csv('%s/%s' % (path, self.csv_dm % (s, color)), dtype=object).fillna('')
+				ucn = pd.read_csv(os.path.join(path, self.csv_cn % (s, color)))['classification_noise'].tolist()
+				udm = pd.read_csv(os.path.join(path, self.csv_dm % (s, color)), dtype=object).fillna('')
 				entries = np.empty((len(self.continuous_variables), len(ContinuousVariableHelper.index)), dtype=object)
 				entries.fill('')
 				
