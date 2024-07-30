@@ -5,6 +5,7 @@ import numpy as np
 import sys
 sys.path.append('../')
 
+
 # custom tkinter import
 from customtkinter import *
 from CTkMessagebox import CTkMessagebox
@@ -18,7 +19,6 @@ from GUI_SamplerPropertiesMatrix import *
 from GUI_UncertantiesMatrix import *
 from GUI_ContinuousDistributionMatrix import *
 from GUI_MultivariateDistributionMatrix import *
-
 import NA_DAtabase as NA_D
 
 class App(CTk):
