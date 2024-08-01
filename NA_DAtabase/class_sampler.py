@@ -938,7 +938,8 @@ class MorphShapes_DB_Builder:
 
 		if self.gui != None:
 			self.gui.pb.set(1)
-			self.gui.pbLabel.configure(text="100%")
+			self.gui.pbLabel.configure(text="Joining data...")
+			self.gui.update()
 			
 		for proc in procs:
 			proc.join()

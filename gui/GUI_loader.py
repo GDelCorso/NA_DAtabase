@@ -44,14 +44,14 @@ class LoaderWindow(CTkToplevel):
 		self.loadBtn.grid(row=9, column=0, padx=5, pady=15)
 	
 	def add_entry(self, sf, si, s):
-		b = CTkButton(sf, text=s, border_width=1,border_color="black", fg_color="#444", hover_color="#060")
+		b = CTkButton(sf, text=s, border_width=1,border_color="black", fg_color="#444", hover_color="#800")
 		b.configure(command=lambda: self.select(b))
 		b.grid(row=si, column=0, padx=5, pady=5, sticky="nswe")
 		return b
 
 	def select(self, e):
-		[x.configure(fg_color="#444", hover_color="#060") for x in self.entries]
-		e.configure(fg_color="#800", hover_color="#800")
+		[x.configure(fg_color="#444", hover_color="#800") for x in self.entries]
+		e.configure(fg_color="#060", hover_color="#060")
 		self.selected_db = e.cget("text")
 		self.loadBtn.configure(state="normal")
 

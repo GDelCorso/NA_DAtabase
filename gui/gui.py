@@ -42,7 +42,7 @@ class App(CTk):
 		self.withdraw()
 		# initialize the window		
 		
-		self.titleString = "NA Database Configurator"
+		self.titleString = "NA Database Builder"
 		self.title(self.titleString)
 		self.geometry("1200x640")
 		self.grid_columnconfigure(0, weight=1)
