@@ -288,8 +288,9 @@ class SamplerPropertiesMatrix():
 			elif x == 'correct_classes':
 				# TODO
 				
-				self.list1 = list(sp[x].values())
-				self.update_textbox()
+				if(np.isnan(sp[x][0]) == False):
+					self.list1 = list(sp[x].values())
+					self.update_textbox()
 			elif x == 'out_of_border' and sp[x][0]:
 				self.data[x].set(1)
 				self.c.select()
