@@ -1009,7 +1009,7 @@ class MorphShapes_DB_Builder:
 		)
 
 		rotation = row['rotation_(degrees)']
-		morph_percentage = row['deformation']
+		morph_percentage = min(max(row['deformation'], 0), 100)
 
 		M.drawShape(
 			Shape(

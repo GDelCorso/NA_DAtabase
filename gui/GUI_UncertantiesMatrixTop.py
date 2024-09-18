@@ -32,6 +32,10 @@ class UncertantiesMatrixTop(CTkToplevel):
 			'cv': []
 		}
 
+		self.excluded_cbox_values = {
+			'deformation' : ['gaussian']
+		}
+
 		self._coords = (0, 0)
 		
 		self.title("Uncertanties")
@@ -162,6 +166,10 @@ class UncertantiesMatrixTop(CTkToplevel):
 	def add_row(self, master, what, row):
 		CTkLabel(master, text='%s:' % ContinuousVariableHelper.title(what), anchor="e").grid(row=row, column=0, padx=5, pady=5, sticky='we')
 		values = list(ContinuousVariableHelper.cbox_lock_values.keys())
+
+		if what in self.excluded_cbox_values:
+			values = [x for x in values if x not in self.excluded_cbox_values[what]]
+		
 		cb = CTkComboBox(master, values=values, state="readonly", command=lambda v:self.lock(v, row-1))
 		cb.grid(row=row, column=1, padx=5, sticky='we')
 		
@@ -342,7 +350,7 @@ class UncertantiesMatrixTop(CTkToplevel):
 				EntryHelper.update_value(e,self._last_value)
 				return
 		
-			if value > max_value:
+			if max_value > 0 and value > max_value:
 				self.parent.parent.error_msg("Error: %s must be lower than %s." % (ContinuousVariableHelper.title(ContinuousVariableHelper.index[i]), str(max_value)))
 				EntryHelper.update_value(e,self._last_value)
 				return
@@ -403,7 +411,7 @@ class UncertantiesMatrixTop(CTkToplevel):
 			return
 
 		min_value = 0
-		max_value = 100
+		max_value = 100 if i < 4 else -1
 
 		i,j = self._coords
 		e = self.entries[i][j]
@@ -433,8 +441,8 @@ class UncertantiesMatrixTop(CTkToplevel):
 				EntryHelper.update_value(e, f_value)
 
 		min_value = 0
-		max_value = 100
-
+		max_value = 100 if row < 5 else -1
+		
 		CellHelper.bind_cell(e, lambda evt: self.check(row-1,i, min_value, max_value))
 		return e	
 
