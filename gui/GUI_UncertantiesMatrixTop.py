@@ -38,7 +38,6 @@ class UncertantiesMatrixTop(CTkToplevel):
 
 		self._coords = (0, 0)
 		
-		self.title("Uncertanties")
 		self.protocol("WM_DELETE_WINDOW", self._close)
 
 		# last cell value focused on
@@ -292,6 +291,13 @@ class UncertantiesMatrixTop(CTkToplevel):
 		c.configure(fg_color=color, text_color=ColorHelper.getTextColor(color))
 
 	def modify(self, stuff, row, col, multiple=False):
+		if multiple:
+			self.title("Uncertanties (%s, %s)" % ("*","*"))
+		else:
+			sides = self.parent.G.shape_order[col]
+			shape = "%s sides poly" % sides if int(sides) > 2 else "circle" 
+			self.title("Uncertanties (%s, %s)" % (shape,self.parent.G.color_order[row]))
+
 		self.reset_cn()
 		self.reset_distribution()
 		

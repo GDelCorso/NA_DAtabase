@@ -17,7 +17,6 @@ class MultivariateDistributionMatrixTop(CTkToplevel):
 	def __init__(self, parent, d_matrix):
 		super().__init__()
 		self.parent = parent
-		self.title("Multivariate distribution")
 		self.protocol("WM_DELETE_WINDOW", self._close)
 		self.d_matrix = d_matrix
 		self._last_value = None
@@ -51,6 +50,12 @@ class MultivariateDistributionMatrixTop(CTkToplevel):
 		self.withdraw()
 
 	def modify(self, d_matrix, row, col, multiple=False):
+		if multiple:
+			self.title("Correlation matrix (%s, %s)" % ("*","*"))
+		else:
+			sides = self.parent.G.shape_order[col]
+			shape = "%s sides poly" % sides if int(sides) > 2 else "circle" 
+			self.title("Correlation matrix (%s, %s)" % (shape,self.parent.G.color_order[row]))
 		# print(d_matrix)
 		self.d_matrix = d_matrix
 		self.row = row
