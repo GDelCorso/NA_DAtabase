@@ -1446,7 +1446,7 @@ class Shape:
 class Main_Surface:
 	def __init__(self, width, height):
 		# 
-		# The main canvas where the shape(s) is/are drawn
+		# The main canvas where the shape is drawn
 		# 
 		self._main_surface = PIL_Drawing(width, height)
 		self.shape = None
@@ -1466,7 +1466,7 @@ class Main_Surface:
 			Image.Resampling.BICUBIC
 		)
 		
-	def drawShape(self, shape, sides = 0, anti_aliasing = True):
+	def drawShape(self, shape, anti_aliasing = True):
 		if self.shape != None:
 			return
 		# 
