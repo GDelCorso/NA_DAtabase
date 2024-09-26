@@ -1257,7 +1257,7 @@ class Shape:
 		# the final image is resized to its original size,
 		# using AA filter if required
 		# 
-		resampling = Image.Resampling.BICUBIC if anti_aliasing else Image.Resampling.NEAREST
+		resampling = Image.Resampling.BILINEAR if anti_aliasing else Image.Resampling.NEAREST
 
 		original_size = self._shape_canvas.image().size[0] // self._up_factor
 
@@ -1272,7 +1272,7 @@ class Shape:
 		if self._rotation == 0 or self._sides == 0:
 			return
 
-		resampling = Image.Resampling.BICUBIC if anti_aliasing else Image.Resampling.NEAREST
+		resampling = Image.Resampling.BILINEAR if anti_aliasing else Image.Resampling.NEAREST
 
 		rot = self._shape_canvas.image().rotate(
 			-self._rotation, 
