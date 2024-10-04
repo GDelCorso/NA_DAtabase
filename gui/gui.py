@@ -16,7 +16,7 @@ from GUI_helper import *
 from GUI_loader import *
 from GUI_ShapesAndColorsMatrix import *
 from GUI_SamplerPropertiesMatrix import *
-from GUI_UncertantiesMatrix import *
+from GUI_UncertaintiesMatrix import *
 from GUI_ContinuousDistributionMatrix import *
 from GUI_MultivariateDistributionMatrix import *
 import NA_DAtabase as NA_D
@@ -32,7 +32,7 @@ class App(CTk):
 	tabview_info = {
 		'Shapes and Colors': "Provides the probability of each color/shape combination.\n\nP value (row on the left): Cumulative probability of the color among different shapes. If changed, it will update all unlocked cells corresponding to this color.\nP value (column on the top): Cumulative probability of the shape among different colors. If changed, it will update all unlocked cells corresponding to this shape.\nLock/Unlock symbol: Lock/unlock the cell/row/column value to prevent the probability from being updated automatically.\nReset p-matrix: Unlock all cells and sample each shape/color combination with equal probability",
 		'Sampler Properties': "Contains the properties of the dataset and optionally the addresses for classification ground truth.\n\nCorrect classes:  [Facultative] Choose a correct class for classification (colors and/or shapes).\nAllow out of border: Allow for production of shapes with center into the image and radii eventually out of borders. If disabled the only sampling strategy allowed is MC.",
-		'Uncertanties': "Provides the marginal distribution of each continuous random variable and classification noise for every couple of shapes and colors.\nClassification noise (manage aleatoric classification uncertainty over a specific class):  [Facultative] Choose a noise percentage (range from 0 to 1) over classes for classification (colors and/or shapes).\nPossible distributions include: Constant, Uniform, Gaussian and Truncated Gaussian. To set up a single bound for a Truncated Gaussian Distribution, it is sufficient to keep the default infinity bound.\n\nDeformation: Continuous deformation [0-100%] of the original shape into a circle. A value of 0 means that no deformation is applied to the shape, while a deformation of 100% converts the original image into a circle.",
+		'Uncertainties': "Provides the marginal distribution of each continuous random variable and classification noise for every couple of shapes and colors.\nClassification noise (manage aleatoric classification uncertainty over a specific class):  [Facultative] Choose a noise percentage (range from 0 to 1) over classes for classification (colors and/or shapes).\nPossible distributions include: Constant, Uniform, Gaussian and Truncated Gaussian. To set up a single bound for a Truncated Gaussian Distribution, it is sufficient to keep the default infinity bound.\n\nDeformation: Continuous deformation [0-100%] of the original shape into a circle. A value of 0 means that no deformation is applied to the shape, while a deformation of 100% converts the original image into a circle.",
 		'Continuous distribution': "Provides the marginal distribution of each continuous random variable. Possible distributions include: Constant, Uniform, Gaussian and Truncated Gaussian. To set up a single bound for a Truncated Gaussian Distribution, it is sufficient to keep the default infinity bound.\n\nCenter X: Relative position [0 – 100%] on the horizontal axis of the center of the shape.\nCenter Y: Relative position [0 – 100%] on the vertical axis of the center of the shape.\nRadius:Radius [0-100%] of the given shape. If the random radius exceeds the boundaries of the image and Allow Out Of Border(s) matrix is not checked, the image will be resampled.\nRotation: Rotation (0-360°) of the given shape.",
 		'Multivariate distribution': "Multivariate distribution is the correlation matrix between continuous variables for every couple of shapes and colors.\n\nEdit selected: allows to set correlations between continuous variables for each of the selected color/shape couples. Values showing * imply that some color/shape couples have different values; modifying these values in the matrix updates each couple to the provided value.\nM: clicking on m (matrix) allows us to update the correlation values for that specific matrix (corresponding to a precise color/shape couple)."
 	}
@@ -78,7 +78,7 @@ class App(CTk):
 		self.tabview = CTkTabview(master=self)
 		self.tabview.add("Shapes and Colors")
 		self.tabview.add("Sampler Properties")
-		self.tabview.add("Uncertanties")
+		self.tabview.add("Uncertainties")
 		self.tabview.add("Continuous distribution")
 		self.tabview.add("Multivariate distribution")
 		self.tabview.grid(row=1, column=0, padx=10, pady=5, sticky="nswe")
@@ -86,7 +86,7 @@ class App(CTk):
 		# add contents for every tab
 		
 		self.SamplerPropertiesMatrix = SamplerPropertiesMatrix(self)
-		self.UncertantiesMatrix = UncertantiesMatrix(self)
+		self.UncertaintiesMatrix = UncertaintiesMatrix(self)
 		self.ContinuousDistributionMatrix = ContinuousDistributionMatrix(self)
 		self.MultivariateDistributionMatrix = MultivariateDistributionMatrix(self)
 		self.ShapesAndColorsMatrix = ShapesAndColorsMatrix(self)
@@ -151,7 +151,7 @@ class App(CTk):
 			self.SamplerPropertiesMatrix.save(self.db_name) and \
 			self.ContinuousDistributionMatrix.save(self.db_name) and \
 			self.MultivariateDistributionMatrix.save(self.db_name) and \
-			self.UncertantiesMatrix.save(self.db_name):
+			self.UncertaintiesMatrix.save(self.db_name):
 			self.success_msg("Data successfully saved in folder %s" % self.db_name, True)
 			self.generate.configure(state="normal")
 			
@@ -190,7 +190,7 @@ class App(CTk):
 		self.SamplerPropertiesMatrix.load(path)
 		self.ContinuousDistributionMatrix.load(path)
 		self.MultivariateDistributionMatrix.load(path)
-		self.UncertantiesMatrix.load(path)
+		self.UncertaintiesMatrix.load(path)
 		
 	def success_msg(self, msg, alert=False):
 		'''

@@ -103,7 +103,7 @@ class ShapesAndColorsMatrix():
 			# add shape in GUI_interface
 			self.G.new_shape(vertices)
 			self.parent.MultivariateDistributionMatrix.new_shape(vertices, self.G)
-			self.parent.UncertantiesMatrix.new_shape(vertices, self.G)
+			self.parent.UncertaintiesMatrix.new_shape(vertices, self.G)
 			
 			# place the frame in the gui
 			sf.grid(row=0, column=len(self.G.shape_order))
@@ -162,7 +162,7 @@ class ShapesAndColorsMatrix():
 		# add color in GUI_interface
 		self.G.new_color(color_picked)
 		self.parent.MultivariateDistributionMatrix.new_color(color_picked, self.G)
-		self.parent.UncertantiesMatrix.new_color(color_picked, self.G)
+		self.parent.UncertaintiesMatrix.new_color(color_picked, self.G)
 			
 		# place the frame in the gui
 		cf.grid(row=len(self.G.color_order), column=0)
@@ -425,4 +425,4 @@ class ShapesAndColorsMatrix():
 		#update other matrix
 		self.parent.SamplerPropertiesMatrix.update(self.G)
 		self.parent.MultivariateDistributionMatrix.update(self.G)
-		self.parent.UncertantiesMatrix.update(self.G)
+		self.parent.UncertaintiesMatrix.update(self.G)

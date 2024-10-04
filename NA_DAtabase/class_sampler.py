@@ -105,12 +105,12 @@ class random_sampler:
 		# List all the elements in the folder
 		list_csv = os.listdir(self.path_save_folder)
 		aux_list = [i.split('_')[4].split('.')[0].split('-')                     
-					for i in list_csv if "uncertanties_classification_noise" in i]
+					for i in list_csv if "uncertainties_classification_noise" in i]
 		aux_list = ["("+i[0]+', '+i[1]+', '+i[2]+')' for i in aux_list]
 		# Select only csv containing
 		list_selected_csv = [[int(i.split('_')[3]),i] 
 								 for i in list_csv 
-								   if "uncertanties_classification_noise" in i]
+								   if "uncertainties_classification_noise" in i]
 		
 		self.df_path_classification_noise = pd.DataFrame(list_selected_csv, 
 										  columns = ['shape', 'path'])
@@ -123,11 +123,11 @@ class random_sampler:
 		list_csv = os.listdir(self.path_save_folder)
 		# Select only csv containing
 		aux_list = [i.split('_')[4].split('.')[0].split('-')                     
-					for i in list_csv if "uncertanties_distribution_matrix" in i]
+					for i in list_csv if "uncertainties_distribution_matrix" in i]
 		aux_list = ["("+i[0]+', '+i[1]+', '+i[2]+')' for i in aux_list]
 		list_selected_csv = [[int(i.split('_')[3]), i] 
 							 for i in list_csv 
-								   if "uncertanties_distribution_matrix" in i]
+								   if "uncertainties_distribution_matrix" in i]
 		
 		self.df_path_distribution_noise = pd.DataFrame(list_selected_csv, 
 										  columns = ['shape', 'path'])
@@ -573,12 +573,12 @@ class random_sampler:
 		sample_df['correct_class'] = False
 		sample_df['noisy_class'] = False
 		
-		# Import uncertanties_classification_noise
-		temp_df_path_uncertanties_classification_noise = self.df_path_classification_noise
-		temp_df_path_uncertanties_classification_noise = temp_df_path_uncertanties_classification_noise[temp_df_path_uncertanties_classification_noise['shape']==int(shape)]
-		temp_df_path_uncertanties_classification_noise = temp_df_path_uncertanties_classification_noise[temp_df_path_uncertanties_classification_noise['color']==color]
-		temp_df_path_uncertanties_classification_noise = os.path.join(self.path_save_folder,temp_df_path_uncertanties_classification_noise.iloc[0]['path'])
-		temp_distribution_noise = pd.read_csv(temp_df_path_uncertanties_classification_noise)#.iloc[:,1:]
+		# Import uncertainties_classification_noise
+		temp_df_path_uncertainties_classification_noise = self.df_path_classification_noise
+		temp_df_path_uncertainties_classification_noise = temp_df_path_uncertainties_classification_noise[temp_df_path_uncertainties_classification_noise['shape']==int(shape)]
+		temp_df_path_uncertainties_classification_noise = temp_df_path_uncertainties_classification_noise[temp_df_path_uncertainties_classification_noise['color']==color]
+		temp_df_path_uncertainties_classification_noise = os.path.join(self.path_save_folder,temp_df_path_uncertainties_classification_noise.iloc[0]['path'])
+		temp_distribution_noise = pd.read_csv(temp_df_path_uncertainties_classification_noise)#.iloc[:,1:]
 		temp_distribution_noise = temp_distribution_noise.replace(np.nan, None)
 	  
 	  
