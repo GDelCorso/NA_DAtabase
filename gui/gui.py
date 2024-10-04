@@ -47,6 +47,7 @@ class App(CTk):
 		self.geometry("1200x640")
 		self.grid_columnconfigure(0, weight=1)
 		self.grid_rowconfigure(1, weight=1)
+		self.minsize(1200,640)
 		
 		bf = CTkFrame(self)
 		bf.grid(row=0, column=0, padx=10,sticky="we")

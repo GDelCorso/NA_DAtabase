@@ -15,20 +15,7 @@ class UncertaintiesMatrixTop(CTkToplevel):
 		super().__init__()
 		self.parent = parent
 
-		self.cn = {
-			'old_shape': StringVar(),
-			'new_shape': StringVar(),
-			'cb_shape': StringVar(),
-			'old_color': StringVar(),
-			'new_color': StringVar(),
-			'cb_color': StringVar(),
-			'probability': StringVar(),
-			'textbox': StringVar()
-		}
-
 		self.cbox = {
-			'shape': [],
-			'color': [],
 			'cv': []
 		}
 
@@ -75,7 +62,7 @@ class UncertaintiesMatrixTop(CTkToplevel):
 		}
 
 		self.withdraw()
-
+		'''
 		rf = CTkFrame(self)
 		rf.grid_columnconfigure(0, weight=1)
 		rf.grid(row=0, column=0, pady=0, rowspan=2, sticky="nswe")
@@ -108,20 +95,16 @@ class UncertaintiesMatrixTop(CTkToplevel):
 
 		
 		self.p = self.add_entry(rfb, 'Probability', 3, self.cn['probability'], self.v_float)
-		'''
-		CTkLabel(rfb, text='Probability:', anchor="e").grid(row=3, column=0, padx=5, pady=5, sticky='we')
-		CTkEntry(rfb,state = "normal",fg_color="#000", justify="right", textvariable=self.cn['probability'],validate='focusout', validatecommand=lambda: self.v_float(self.cn['probability'].get())).grid(row=3, column=1, padx=5, sticky='we')
-		'''
-
+		
 		CTkButton(rfb, text='+', command=self.add_cn).grid(row=3, column=4, padx=5, pady=5,sticky='we')
 		
 		CTkButton(rfb, text='Reset', command=self.reset_cn).grid(row=4, column=4, padx=5, pady=5,sticky='we')
 		
 		self.cn_textbox = CTkTextbox(rfb, wrap="word", width=300, bg_color="#333", state="disabled")
 		self.cn_textbox.grid(row=1, column=6, pady=5, rowspan="4",padx=5,sticky='nswe')
+		'''
 
-
-		f = CTkFrame(rf)
+		f = CTkFrame(self)
 		f.grid_columnconfigure((0,1,2,3,4,5), weight=1)
 		f.grid(row=1, column=0, pady=10, rowspan=2, sticky="nswe")
 
@@ -183,112 +166,10 @@ class UncertaintiesMatrixTop(CTkToplevel):
 		'''
 		return cb
 
-	def add_cbox(self, master, what, row, column):
-		CTkLabel(master, text="%s:" % what.title(), anchor="e").grid(row=row, column=column, padx=5, pady=5, sticky='we')
-		what = re.sub(r'\d+', '', what)
-		s = CTkComboBox(master, values=[''], state="readonly")
-		if what=='color':
-			s.configure(command=lambda e:self.update_bg_color(s))
-		s.grid(row=row, column=(column+1), padx=5, sticky='we')
-		self.cbox[what].append(s)
-		return s
-	
-	def add_entry(self, master, what, row, textvariable, callback = None, default = None):
-		if callback == None:
-			callback= self.v_int
-		CTkLabel(master, text='%s:' % what, anchor="e").grid(row=row, column=0, padx=5, pady=5, sticky='we')
-		e = CTkEntry(master,state = "normal",fg_color="#000", justify="right", textvariable=textvariable)
-		
-		CellHelper.bind_cell(e, callback)
-		e.grid(row=row, column=1, padx=5, sticky='we')
-
-		if(default is not None):
-			EntryHelper.update_value(e, default)
-		
-		return e;
-
-	def v_float(self, e):
-		value = e.get().strip()
-		
-		if len(value) == 0:
-			return
-		try:
-			f = float(value)
-			if f < 0 or f > 1:
-				self.parent.parent.error_msg("Error: probability must be a float number between 0 and 1).")
-				EntryHelper.update_value(e, '0')
-				return False
-			else:
-				self.parent.parent.success_msg("%s inserted successfully." % value)
-				return True
-				
-		except ValueError:
-			self.parent.parent.error_msg("Error: probability must be a float number between 0 and 1).")
-			EntryHelper.update_value(e, '0')
-			return False
-
-	def add_cn(self):
-		cc_shape1, cc_shape2, cc_color1, cc_color2, p = self.cbox['shape'][0].get(),self.cbox['shape'][1].get(),self.cbox['color'][0].get(),self.cbox['color'][1].get(), self.p
-		
-		if len(p.get()) == 0:
-			self.parent.parent.error_msg("Error: Probability in Classification Noise cannot be empty.")
-			return
-
-		if (self.v_float(p) == False):
-			return;
-		
-		if self.cn['cb_shape'].get() == 'disabled':
-			cc_shape2 = "*"
-
-		if self.cn['cb_color'].get() == 'disabled':
-			cc_color2 = "*"
-		
-
-		value_to_check = '[%s/%s]%s[%s/%s]' % (cc_shape1, str(ColorHelper.hexToRGB(cc_color1)), TextboxHelper.SEPARATOR, cc_shape2, str(ColorHelper.hexToRGB(cc_color2)))
-
-		value = '%s%s%s' % (value_to_check, TextboxHelper.SEPARATOR, p.get())
-
-		if value_to_check not in map(self.reduce,self.stuff['list']):
-			self.stuff['list'].append(value)
-		else:
-			self.parent.parent.error_msg('%s already present in list.' % value_to_check)
-
-		TextboxHelper.update_value(self.cn_textbox, '\n'.join(self.stuff['list']))
-		
-		return 
-
-	def reset_cn(self):
-		if hasattr(self, 'stuff'):
-			self.stuff['list'] = []
-
-		EntryHelper.update_value(self.p, None)
-		
-		self.c1.deselect()
-		self.c2.deselect()
-
-		for key in self.cbox:
-			for cb in self.cbox[key]:
-				if key != 'cv':
-					cb.set('')
-					self.update_bg_color(cb)
-
-		TextboxHelper.update_value(self.cn_textbox, '')
-
 	def reset_distribution(self):
 		self._update_values(self.parent._empty_cell_matrix())
 
 		self.parent.parent.success_msg("All Reset to default.")
-
-	def reduce(self,array):
-		array = array.split(";")
-		return "%s;%s" % (array[0],array[1])
-
-
-	def update_bg_color(self, c):
-		color = c.get()
-		if color == '':
-			color='#343638'
-		c.configure(fg_color=color, text_color=ColorHelper.getTextColor(color))
 
 	def modify(self, stuff, row, col, multiple=False):
 		if multiple:
@@ -298,7 +179,6 @@ class UncertaintiesMatrixTop(CTkToplevel):
 			shape = "%s sides poly" % sides if int(sides) > 2 else "circle" 
 			self.title("Uncertainties (%s, %s)" % (shape,self.parent.G.color_order[row]))
 
-		self.reset_cn()
 		self.reset_distribution()
 		
 		self.stuff = stuff.copy()
@@ -308,8 +188,9 @@ class UncertaintiesMatrixTop(CTkToplevel):
 		self.multiple = multiple
 		
 		self._update_values(stuff);
+		'''
 		TextboxHelper.update_value(self.cn_textbox, '\n'.join(stuff['list']))
-
+		'''
 		self.deiconify()
 		self.focus_force()
 		self.grab_release()
@@ -319,7 +200,6 @@ class UncertaintiesMatrixTop(CTkToplevel):
 		for i in range(len(self.cbox['cv'])):
 			self.cbox['cv'][i].set(stuff['cbox'][i])
 			self.lock(stuff['cbox'][i], i)
-
 		for i in range(stuff['entries'].shape[0]):
 			for j in range (stuff['entries'].shape[1]):
 				EntryHelper.update_value(self.entries[i][j], stuff['entries'][i][j])
@@ -456,9 +336,3 @@ class UncertaintiesMatrixTop(CTkToplevel):
 		self._last_value = value
 		self._coords = (row,col)
 		
-	def update(self, G):
-		for s in self.cbox['shape']:
-			s.configure(values=[''] + G.shape_order)
-		for c in self.cbox['color']:
-			c.configure(values=[''] + G.color_order)    
-		return
