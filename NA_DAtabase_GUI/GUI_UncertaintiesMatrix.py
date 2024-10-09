@@ -47,6 +47,7 @@ class UncertaintiesMatrix():
 			'color': []
 		}
 
+		self.list = []
 
 		self.G = None
 		self.u_matrix = np.empty((0,0), dtype=object)
