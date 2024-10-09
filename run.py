@@ -3,8 +3,8 @@
 import re
 import numpy as np
 import sys
-sys.path.append('./NA_DAtabase_Sampler')
-sys.path.append('./NA_DAtabase_GUI')
+sys.path.append('NA_DAtabase_Sampler')
+sys.path.append('NA_DAtabase_GUI')
 
 
 # custom tkinter import
