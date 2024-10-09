@@ -146,7 +146,7 @@ class MultivariateDistributionMatrix():
 						csvdata[x][y] = self.d_matrix[i][j][i_i][i_j]
 
 		df = pd.DataFrame(csvdata, index=index, columns=columns)
-		path_data = os.getcwd()
+		path_data = PathHelper.get_db_path()
 		path_data = os.path.join(path_data, db_name)
 		filename = os.path.join(path_data, self.csv)
 		#print(filename)

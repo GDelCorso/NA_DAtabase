@@ -266,9 +266,9 @@ class SamplerPropertiesMatrix():
 			
 			head = ['dataset_size', 'sampling_strategy', 'random_seed', 'pixel_resolution_x', 'pixel_resolution_y', 'correct_classes', 'background_color', 'out_of_border', 'correlation']
 
-			path_data = os.getcwd()
+			path_data = PathHelper.get_db_path()
 			path_data = os.path.join(path_data, db_name)
-
+			
 			filename = os.path.join(path_data, self.csv)
 			pd.DataFrame(csvdata, columns=head).to_csv(filename, index=False)
 

@@ -206,6 +206,8 @@ class ShapesAndColorsMatrix():
 			for psi, shape in enumerate(shapes):
 				self.G.modify_cell(shape, color, probabilities[pci][psi])
 				
+		self.G.unlock_all()
+		
 		self._refresh_values(False)
 		
 	def reset(self):

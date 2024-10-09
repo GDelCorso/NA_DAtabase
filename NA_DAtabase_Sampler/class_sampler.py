@@ -20,7 +20,7 @@ from random import randint, seed
 from math import pi, sin, radians, cos, dist, sqrt, acos
 
 
-from multiprocessing import Process, Manager
+from multiprocessing import Process, Manager, set_start_method
 
 ###############################################################################
 class random_sampler:
@@ -883,14 +883,21 @@ class random_sampler:
 
 #%% Class to generate pictures
 class MorphShapes_DB_Builder:
-	def __init__(self, csv_path, gui = None, enable_multiprocess = True):
+	def __init__(self, csv_path, gui = None, enable_multiprocess = None):
 		''' 
 		Load the data from the given csv_path
 		''' 
 		
+		if enable_multiprocess != None:
+			self.enable_multiprocess = enable_multiprocess
+		try:
+			set_start_method('fork')
+			self.enable_multiprocess = True
+			print("\n\n parallelo\n\n")
+		except:
+			self.enable_multiprocess = False
+			print("\n\n NON parallelo\n\n")
 		
-		self.enable_multiprocess = enable_multiprocess
-
 		path_csv_to_read = os.path.join(csv_path,
 									  'combined_dataframe.csv')
 		self.df = pd.read_csv(path_csv_to_read)
@@ -928,7 +935,7 @@ class MorphShapes_DB_Builder:
 				procs.append(proc)
 				proc.start()
 			else:
-				self.add_row(index, row)
+				self.add_row(index, row, area, area_noise)
 
 			percentage = index/self.df.shape[0]
 			if self.gui != None:

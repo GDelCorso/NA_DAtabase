@@ -241,7 +241,7 @@ class UncertaintiesMatrix():
 				csvdata = [[str(e).replace(ContinuousVariableHelper.infinity, "inf") for e in sub] for sub in entries]
 				csvdata = np.transpose(csvdata)
 				
-				path_data = os.getcwd()
+				path_data = PathHelper.get_db_path()
 				path_data = os.path.join(path_data, db_name)
 				
 				filename = self.csv_dm % ( self.G.shape_order[si], colors[ci])
@@ -266,9 +266,9 @@ class UncertaintiesMatrix():
 				else:
 					csvdata = []
 
-				path_data = os.getcwd()
+				path_data = PathHelper.get_db_path()
 				path_data = os.path.join(path_data, db_name)
-				
+			
 				filename = self.csv_cn % ( self.G.shape_order[si], colors[ci])
 				filename = os.path.join(path_data, filename)
 				
