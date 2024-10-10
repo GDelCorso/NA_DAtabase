@@ -221,4 +221,5 @@ class App(CTk):
 	
 # set the dark mode
 set_appearance_mode("dark")  
-app = App()
+if __name__ == "__main__":
+	app = App()

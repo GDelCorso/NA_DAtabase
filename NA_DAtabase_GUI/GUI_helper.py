@@ -135,9 +135,5 @@ class ContinuousVariableHelper():
 				
 class PathHelper:
 	def get_db_path():
-		file_path =  (os.path.dirname(__file__))
-		os.chdir(file_path)
-		os.chdir("..")
-		os.chdir("output")
-		return os.getcwd()
+		return os.path.join(os.getcwd(),'output')
 
