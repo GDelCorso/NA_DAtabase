@@ -38,7 +38,9 @@ class random_sampler:
 				 dataset_correlation = None,
 				 continuous_variables = None,
 				 max_find_another = 10000,
-				 gui = None):
+				 gui = None,
+				 enable_multiprocess = False,
+				 enable_fork = False):
 		
 		'''
 		dataset_name = None : name of the dataset.
@@ -51,6 +53,9 @@ class random_sampler:
 		max_find_another = 10000 : maximum number of resampling for MC simulations.
 		'''
 		
+		self.enable_multiprocess = enable_multiprocess
+		self.enable_fork = enable_fork
+
 		# Define the actual path
 		if main_path == None:
 			self.path_cwd = os.getcwd()
@@ -862,7 +867,7 @@ class random_sampler:
 		Generate the images from the defined dataset.
 		'''
 
-		MDB = MorphShapes_DB_Builder(self.path_save_folder, self.gui)
+		MDB = MorphShapes_DB_Builder(self.path_save_folder, self.gui, self.enable_multiprocess, self.enable_fork)
 		
 		MDB.generate()
 		
@@ -883,18 +888,12 @@ class random_sampler:
 
 #%% Class to generate pictures
 class MorphShapes_DB_Builder:
-	def __init__(self, csv_path, gui = None, enable_multiprocess = None):
+	def __init__(self, csv_path, gui = None, enable_multiprocess = False, enable_fork = False):
 		''' 
 		Load the data from the given csv_path
 		''' 
-		if enable_multiprocess != None:
-			self.enable_multiprocess = enable_multiprocess
-		if get_start_method() == 'fork':
-			self.enable_multiprocess = True
-			print("\n\n parallelo\n\n")
-		else:
-			self.enable_multiprocess = False
-			print("\n\n NON parallelo\n\n")
+		self.enable_multiprocess = enable_multiprocess
+		self.enable_fork = enable_fork
 		
 		path_csv_to_read = os.path.join(csv_path,
 									  'combined_dataframe.csv')
@@ -915,7 +914,7 @@ class MorphShapes_DB_Builder:
 
 	def generate(self):
 		import psutil
-		total_threads = psutil.cpu_count()/psutil.cpu_count(logical=False) * psutil.cpu_count()
+		total_threads = psutil.cpu_count()/psutil.cpu_count(logical=False) * psutil.cpu_count() * 4
 		'''
 		Generates the shape in the canvas based on csv data
 		'''
@@ -928,33 +927,36 @@ class MorphShapes_DB_Builder:
 		
 		procs = []
 
-
-		for index, row in self.df.iterrows():
-			if self.enable_multiprocess:
+		# parallelo su unix con fork
+		if self.enable_multiprocess and self.enable_fork:
+			for index, row in self.df.iterrows():
 				proc = Process(target=self.add_row, args=(index,row, area, area_noise))
 				procs.append(proc)
 				proc.start()
 				print ("processing %d" % index)
+				
 				if(index % total_threads == 0):
 					for proc in procs:
 						proc.join()
 					procs = [];
-			else:
+
+				if self.gui != None:
+					percentage = index/self.df.shape[0]
+					self.gui.pb.set(percentage)
+					self.gui.pbLabel.configure(text="%d%%" % int(percentage*100))
+					self.gui.update()
+
+			for proc in procs:
+				proc.join()
+		else:
+			for index, row in self.df.iterrows():
 				self.add_row(index, row, area, area_noise)
-
-			percentage = index/self.df.shape[0]
-			if self.gui != None:
-				self.gui.pb.set(percentage)
-				self.gui.pbLabel.configure(text="%d%%" % int(percentage*100))
-				self.gui.update()
-
-		if self.gui != None:
-			self.gui.pb.set(1)
-			self.gui.pbLabel.configure(text="Joining data...")
-			self.gui.update()
-			
-		for proc in procs:
-			proc.join()
+				
+				if self.gui != None:
+					percentage = index/self.df.shape[0]
+					self.gui.pb.set(percentage)
+					self.gui.pbLabel.configure(text="%d%%" % int(percentage*100))
+					self.gui.update()
 
 		area = [x[1] for x in sorted(area.items())]
 		area_noise = [x[1] for x in sorted(area_noise.items())]

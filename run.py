@@ -38,11 +38,13 @@ class App(CTk):
 		'Multivariate distribution': "Multivariate distribution is the correlation matrix between continuous variables for every couple of shapes and colors.\n\nEdit selected: allows to set correlations between continuous variables for each of the selected color/shape couples. Values showing * imply that some color/shape couples have different values; modifying these values in the matrix updates each couple to the provided value.\nM: clicking on m (matrix) allows us to update the correlation values for that specific matrix (corresponding to a precise color/shape couple)."
 	}
 
-	def __init__(self):
+	def __init__(self, enable_multiprocess = False):
 		super().__init__()
 		self.withdraw()
 		# initialize the window		
 		
+		self.enable_multiprocess = enable_multiprocess
+
 		self.titleString = "NA Database Builder"
 		self.title(self.titleString)
 		self.geometry("1200x640")
@@ -158,6 +160,8 @@ class App(CTk):
 			self.generate.configure(state="normal")
 			
 	def generate_images(self):
+		from multiprocessing import get_start_method
+
 		self.pbLabel.grid(row=0, column=3, padx=5)
 		self.pb.grid(row=0, column=4, padx=15, sticky="ew")
 
@@ -167,7 +171,16 @@ class App(CTk):
 		self.message_box.grid_forget()
 		self.tabview.grid_forget()
 		
-		NA_DA_S.random_sampler(give_full_path=self.ShapesAndColorsMatrix.G.get_save_folder(), gui=self).auto_process()
+		gui = self
+
+		if get_start_method() == 'fork':
+			enable_fork = True
+		else:
+			enable_fork = False
+			self.enable_multiprocess = False
+			print ("Warning: multiprocessing disabled (Switch to UNIX!)")
+
+		NA_DA_S.random_sampler(give_full_path=self.ShapesAndColorsMatrix.G.get_save_folder(), gui=gui, enable_multiprocess=self.enable_multiprocess, enable_fork=enable_fork).auto_process()
 		self.success_msg("Images created successfully", True)
 		
 		self.pbLabel.grid_forget()
@@ -222,4 +235,4 @@ class App(CTk):
 # set the dark mode
 set_appearance_mode("dark")  
 if __name__ == "__main__":
-	app = App()
+	app = App(enable_multiprocess = True)
