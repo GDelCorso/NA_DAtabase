@@ -205,11 +205,11 @@ class ShapesAndColorsMatrix():
 		for pci,color in enumerate(colors):
 			for psi, shape in enumerate(shapes):
 				self.G.modify_cell(shape, color, probabilities[pci][psi])
-				
+		
 		self.G.unlock_all()
-		
-		self._refresh_values(False)
-		
+
+		self._refresh_values()
+				
 	def reset(self):
 		self.G.reset()
 

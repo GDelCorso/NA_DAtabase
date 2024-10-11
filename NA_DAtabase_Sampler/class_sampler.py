@@ -20,7 +20,7 @@ from random import randint, seed
 from math import pi, sin, radians, cos, dist, sqrt, acos
 
 
-from multiprocessing import Process, Manager, set_start_method
+from multiprocessing import Process, Manager, get_start_method
 
 ###############################################################################
 class random_sampler:
@@ -887,14 +887,12 @@ class MorphShapes_DB_Builder:
 		''' 
 		Load the data from the given csv_path
 		''' 
-		
 		if enable_multiprocess != None:
 			self.enable_multiprocess = enable_multiprocess
-		try:
-			set_start_method('fork')
+		if get_start_method() == 'fork':
 			self.enable_multiprocess = True
 			print("\n\n parallelo\n\n")
-		except:
+		else:
 			self.enable_multiprocess = False
 			print("\n\n NON parallelo\n\n")
 		
@@ -916,6 +914,8 @@ class MorphShapes_DB_Builder:
 		self.gui = gui
 
 	def generate(self):
+		import psutil
+		total_threads = psutil.cpu_count()/psutil.cpu_count(logical=False) * psutil.cpu_count()
 		'''
 		Generates the shape in the canvas based on csv data
 		'''
@@ -934,6 +934,11 @@ class MorphShapes_DB_Builder:
 				proc = Process(target=self.add_row, args=(index,row, area, area_noise))
 				procs.append(proc)
 				proc.start()
+				print ("processing %d" % index)
+				if(index % total_threads == 0):
+					for proc in procs:
+						proc.join()
+					procs = [];
 			else:
 				self.add_row(index, row, area, area_noise)
 
