@@ -16,7 +16,7 @@ If you use this dataset in your work, please cite it as follows:
 }
 ```
 
-dSprites is a dataset of 2D shapes procedurally generated from 6 ground truth independent latent factors. These factors are color, shape, scale, rotation, x and y positions of a sprite.
+NA_DA can generate datasets of 2D shapes  6 ground truth independent latent factors. These factors are color, shape, scale, rotation, x and y positions of a sprite.
 
 All possible combinations of these latents are present exactly once, generating N = 737280 total images.
 
