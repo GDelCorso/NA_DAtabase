@@ -20,27 +20,22 @@ NA_DA can generate datasets of 2D shapes with customizable dataset attributes, l
 
 ## Dataset Attributes
 
-* Dataset size:
-* Sampling strategy: 
-* Random seed:
-* Resolution:
-* Background color:
-* Allow out of border:
+* Dataset size: the maximum number of generated images.
+* Sampling strategy: define the technique for sampling a probability distribution (Monte Carlo, Latin HyperCube Sampling, or Low Discrepancy Sequence).
+* Random seed: the number used to initialize the random generator.
+* Resolution: the resolution in pixels of the image's sides.
+* Background color: The color in the hexadecimal value of the image's background.
+* Allow out of border: if you select this option, shapes can extend beyond the image borders.
 
 ## Latent factor values
 
-Color: white
-Shape: square, ellipse, heart
-Scale: 6 values linearly spaced in [0.5, 1]
-Orientation: 40 values in [0, 2 pi]
-Position X: 32 values in [0, 1]
-Position Y: 32 values in [0, 1]
-We varied one latent at a time (starting from Position Y, then Position X, etc), and sequentially stored the images in fixed order. Hence the order along the first dimension is fixed and allows you to map back to the value of the latents corresponding to that image.
-
-We chose the latents values deliberately to have the smallest step changes while ensuring that all pixel outputs were different. No noise was added.
-
-The data is a NPZ NumPy archive with the following fields:
-
+* Color: white
+* Shape: square, ellipse, heart
+* Scale: 6 values linearly spaced in [0.5, 1]
+* Orientation: 40 values in [0, 2 pi]
+* Position X: 32 values in [0, 1]
+* Position Y: 32 values in [0, 1]
+  
 imgs: (737280 x 64 x 64, uint8) Images in black and white.
 latents_values: (737280 x 6, float64) Values of the latent factors.
 latents_classes: (737280 x 6, int64) Integer index of the latent factor values. Useful as classification targets.
