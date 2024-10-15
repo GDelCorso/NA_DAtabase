@@ -18,7 +18,9 @@ If you use this dataset in your work, please cite it as follows:
 
 NA_DA can generate datasets of 2D shapes with customizable dataset attributes, latent variables, uncertainty and deformation and their multivariate distributions.
 
-## Dataset Attributes:
+## User defined parameters:
+
+### Dataset Attributes:
 The generator can be used to define different databases according to user-defined parameters. In particular
 * Dataset size: the maximum number of generated images.
 * Sampling strategy: define the technique for sampling a probability distribution (Monte Carlo, Latin HyperCube Sampling, or Low Discrepancy Sequence).
@@ -27,7 +29,7 @@ The generator can be used to define different databases according to user-define
 * Background color: The color in the hexadecimal value of the image's background.
 * Allow out-of-border: if you select this option, shapes can extend beyond the image borders.
 
-## Latent factor values:
+### Latent factor values:
 
 * Color: all colors can be chosen. Colors can be selected using the color wheel or by entering the hex code directly.
 * Shape: 2D regular shapes. Shapes are identified by the number of vertices (=: circle, 3:triangle, 4:square, and so on)
@@ -36,13 +38,19 @@ The generator can be used to define different databases according to user-define
 * Center X: position of the center on the X axes, identified by a percentage on the length of the X axes. 
 * Center Y: position of the center on the Y axes, identified by a percentage on the length of the Y axes. 
 
-## Uncertainty Related Latent Variables:
+QUI IMMAGINE DATABASE
+
+### Uncertainty Related Latent Variables:
 
 Every image can be associated to a level of uncertainty.
 * Classification noise (labeling noise): quantifies the uncertainty in predicting a class for a given instance.
 * Deformation: from original shape to circle
 
-## Multivariate distribution:
+QUI IMMAGINE DEFORMATION
+
+In particular, the deformation parameter acts on the image to change it from the original shape (i.e. an arbitrary regular polygon) to the circle.  This is directly related to the ability of the model to correctly identify deformed shapes as unreliable predictions.
+
+### Multivariate distribution:
 
 Each of the latent variables and the uncertainty measures can be described by one of the following distributions
 * Constant (fix the value of a latent variable to simplify the problem)
@@ -52,13 +60,18 @@ Each of the latent variables and the uncertainty measures can be described by on
 
 In addition, each of the above distributions is associated with a correlation matrix, which makes it possible to generate a corresponding multivariate distribution according to Sklar's theorem.  Thus, the latent variables can be generated to be dependent on each other.
 
+## Examples of use:
 
-## Disentanglement metrics:
+### Disentanglement metrics:
 
 This dataset was created as a unit test of disentanglement properties of unsupervised models under different probability distributions of the latent variables. NA_DA can be used to determine how well models recover the ground truth latent presented above, especially when their distributions are altered compared to the standard uniform ones proposed in most synthetic datasets.
 
-## Uncertainty Quantification and Reliability:
+### Uncertainty Quantification and Reliability:
 
 This database generator is suitable for uncertainty quantification and reliability analysis on synthetic images (i.e., to test models developed using Bayesian formalism). In particular, different levels of uncertainty (both Epistemic and Aleatoric) can be imposed on the dataset to assess the ability of the model to produce correct reliability estimates.
+
+A detailed description of type of uncertainties and probabilistic models can be found in:
+
+*“Shedding light on Uncertainties in Machine Learning: formal derivation and optimal model selection”*, Del Corso, S. Colantonio, G. Caudai, C. et. al. 
 
 
