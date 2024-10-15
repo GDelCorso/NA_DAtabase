@@ -49,8 +49,8 @@ The generator can be used to define different databasets according to user-defin
 Every image can be associated to a level of uncertainty.
 * **Classification noise (labeling noise):** quantifies the uncertainty in predicting a class for a given instance.
 * **Deformation:** continuous deformation from original shape to circle.
-* **Blur:** Applies a Gaussian blur to the entire surface, with a blur radius determined by the power argument (default value: 2).
-* **White Noise:** Applies a weighted Gaussian noise to the entire surface (noise power between 0 and 1). 
+* **Blur:** applies a Gaussian blur to the entire surface, with a blur radius determined by the power argument (default value: 2).
+* **White Noise:** applies a weighted Gaussian noise to the entire surface (noise power between 0 and 1). 
 * **Holes:** Creates holes on the main canvas (default number of holes: 2) 
 * **Additive Noise:** affects the regression values.
 * **Multiplicative Noise:** affects the regression values.
