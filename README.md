@@ -50,5 +50,7 @@ Alternatively, a HDF5 version is also available, containing the same data, packe
 ## Disentanglement metric
 This dataset was created as a unit test of disentanglement properties of unsupervised models under different probability distributions of the latent variables. NA_DA can be used to determine how well models recover the ground truth latents presented above, especially when their distributions are altered compared to the standard uniform ones proposed in most synthetic datasets.
 
-## Uncertainty measures
+## Uncertainty Quantification and Reliability:
+This database generator is suitable for uncertainty quantification and reliability analysis on synthetic images (i.e., to test models developed using Bayesian formalism). In particular, different levels of uncertainty (both Epistemic and Aleatoric) can be imposed on the dataset to assess the ability of the model to produce correct reliability estimates.
+
 
