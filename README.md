@@ -20,7 +20,7 @@ dSprites is a dataset of 2D shapes procedurally generated from 6 ground truth in
 
 All possible combinations of these latents are present exactly once, generating N = 737280 total images.
 
-Latent factor values
+## Latent factor values
 Color: white
 Shape: square, ellipse, heart
 Scale: 6 values linearly spaced in [0.5, 1]
@@ -39,7 +39,7 @@ latents_classes: (737280 x 6, int64) Integer index of the latent factor values. 
 metadata: some additional information, including the possible latent values.
 Alternatively, a HDF5 version is also available, containing the same data, packed as Groups and Datasets.
 
-Disentanglement metric
+## Disentanglement metric
 This dataset was created as a unit test of disentanglement properties of unsupervised models. It can be used to determine how well models recover the ground truth latents presented above.
 
 You find our proposed disentanglement metric assessing the disentanglement quality of a model (along with an example usage of this dataset) in:
