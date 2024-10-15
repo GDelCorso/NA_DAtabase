@@ -48,6 +48,7 @@ Each of the latent variables and the uncertainty measures can be described by on
 * Uniform distribution (equivalent to generating all possibilities)
 * Gaussian distribution
 * Truncated Gaussian
+
 In addition, each of the above distributions is associated with a correlation matrix, which makes it possible to generate a corresponding multivariate distribution according to Sklar's theorem.  Thus, the latent variables can be generated to be dependent on each other.
 
 
