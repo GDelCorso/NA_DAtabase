@@ -16,11 +16,19 @@ If you use this dataset in your work, please cite it as follows:
 }
 ```
 
-NA_DA can generate datasets of 2D shapes  6 ground truth independent latent factors. These factors are color, shape, scale, rotation, x and y positions of a sprite.
+NA_DA can generate datasets of 2D shapes with customizable dataset attributes, latent variables, uncertainty and deformation and their multivariate distributions.
 
-All possible combinations of these latents are present exactly once, generating N = 737280 total images.
+## Dataset Attributes
+
+Dataset size:
+Sampling strategy: 
+Random seed:
+Resolution:
+Background color:
+Allow out of border:
 
 ## Latent factor values
+
 Color: white
 Shape: square, ellipse, heart
 Scale: 6 values linearly spaced in [0.5, 1]
