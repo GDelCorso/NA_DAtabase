@@ -6,15 +6,14 @@ This repository contains the dSprites dataset, used to assess the disentanglemen
 
 If you use this dataset in your work, please cite it as follows:
 
-Bibtex
-@misc{dsprites17,
-author = {Loic Matthey and Irina Higgins and Demis Hassabis and Alexander Lerchner},
-title = {dSprites: Disentanglement testing Sprites dataset},
-howpublished= {https://github.com/deepmind/dsprites-dataset/},
-year = "2017",
+## Bibtex
+
+```
+@article{volpinidatabase,
+  title={NA DAtabase: Generator of Probabilistic Synthetic Geometrical Shape Dataset},
+  author={Volpini, Federico and Caudai, Claudia and Del Corso, Giulio and Colantonio, Sara}
 }
-Description
-dsprite_gif
+```
 
 dSprites is a dataset of 2D shapes procedurally generated from 6 ground truth independent latent factors. These factors are color, shape, scale, rotation, x and y positions of a sprite.
 
