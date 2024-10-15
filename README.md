@@ -23,12 +23,12 @@ NA_DA can generate datasets of 2D shapes with customizable dataset attributes, l
 ## User defined parameters:
 
 ### Dataset Attributes:
-The generator can be used to define different databasets according to user-defined parameters. In particular
+The generator can be used to define different databasets according to user-defined parameters. In particular:
 * **Dataset size:** the maximum number of generated images.
-* **Sampling strategy:** define the technique for sampling a probability distribution (Monte Carlo, Latin HyperCube Sampling, or Low Discrepancy Sequence).
+* **Sampling strategy:** defines the technique for sampling a probability distribution (Monte Carlo, Latin HyperCube Sampling, or Low Discrepancy Sequence).
 * **Random seed:** the number used to initialize the random generator.
 * **Resolution:** the resolution in pixels of the image's sides.
-* **Background color:** The color in the hexadecimal value of the image's background.
+* **Background color:** the color in the hexadecimal value of the image's background.
 * **Allow out-of-border:** if you select this option, shapes can extend beyond the image borders.
 
 ### Latent factor values:
