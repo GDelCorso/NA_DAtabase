@@ -1,8 +1,7 @@
 # NA_DA: Not-A-DAtabase generator of probabilistic synthetic data 
 
-<p align="center">
- ![anim](https://github.com/user-attachments/assets/22cff88b-ac69-4542-81b3-13318474b0a3)
-</p>
+![anim](https://github.com/user-attachments/assets/22cff88b-ac69-4542-81b3-13318474b0a3)
+
 
 NA_DA is an open-source software written in Python that generates datasets of regular two-dimensional geometric shapes based on probabilistic distributions.
 
