@@ -22,34 +22,36 @@ NA_DA can generate datasets of 2D shapes with customizable dataset attributes, l
 
 ### Dataset Attributes:
 The generator can be used to define different databases according to user-defined parameters. In particular
-* Dataset size: the maximum number of generated images.
-* Sampling strategy: define the technique for sampling a probability distribution (Monte Carlo, Latin HyperCube Sampling, or Low Discrepancy Sequence).
-* Random seed: the number used to initialize the random generator.
-* Resolution: the resolution in pixels of the image's sides.
-* Background color: The color in the hexadecimal value of the image's background.
-* Allow out-of-border: if you select this option, shapes can extend beyond the image borders.
+* **Dataset size:** the maximum number of generated images.
+* **Sampling strategy:** define the technique for sampling a probability distribution (Monte Carlo, Latin HyperCube Sampling, or Low Discrepancy Sequence).
+* **Random seed:** the number used to initialize the random generator.
+* **Resolution:** the resolution in pixels of the image's sides.
+* **Background color:** The color in the hexadecimal value of the image's background.
+* **Allow out-of-border:** if you select this option, shapes can extend beyond the image borders.
 
 ### Latent factor values:
 
-* Color: all colors can be chosen. Colors can be selected using the color wheel or by entering the hex code directly.
-* Shape: 2D regular shapes. Shapes are identified by the number of vertices (=: circle, 3:triangle, 4:square, and so on)
-* Radius: length of the radius, identified by a percentage on the length of the X of Y axes (output images are square).
-* Rotation: Rotation in degrees (from 0 to 360).
-* Center X: position of the center on the X axes, identified by a percentage on the length of the X axes. 
-* Center Y: position of the center on the Y axes, identified by a percentage on the length of the Y axes. 
+* **Color:** all colors can be chosen. Colors can be selected using the color wheel or by entering the hex code directly.
+* **Shape:** 2D regular shapes. Shapes are identified by the number of vertices (i.e, 0:circle, 3:triangle, 4:square, and so on)
+* **Radius:** length of the radius, identified by a percentage on the length of the X of Y axes (output images are square).
+* **Rotation:** Rotation in degrees (from 0 to 360).
+* **Center X:** position of the center on the X axes, identified by a percentage on the length of the X axes. 
+* **Center Y:** position of the center on the Y axes, identified by a percentage on the length of the Y axes. 
 
-QUI IMMAGINE DATABASE
+<p align="center">
+  <img width="460" height="300" src="./NA_DAtabase_GUI/img_example.png">
+</p>
 
 ### Uncertainty Related Latent Variables:
 
 Every image can be associated to a level of uncertainty.
-* Classification noise (labeling noise): quantifies the uncertainty in predicting a class for a given instance.
-* Deformation: continuous deformation from original shape to circle.
-* Blur: Applies a Gaussian blur to the entire surface, with a blur radius determined by the power argument (default value: 2).
-* White Noise: Applies a weighted Gaussian noise to the entire surface (noise power between 0 and 1). 
-* Holes: Creates holes on the main canvas (default number of holes: 2) 
-* Additive Noise: affects the regression values.
-* Multiplicative Noise: affects the regression values.
+* **Classification noise (labeling noise):** quantifies the uncertainty in predicting a class for a given instance.
+* **Deformation:** continuous deformation from original shape to circle.
+* **Blur:** Applies a Gaussian blur to the entire surface, with a blur radius determined by the power argument (default value: 2).
+* **White Noise:** Applies a weighted Gaussian noise to the entire surface (noise power between 0 and 1). 
+* **Holes:** Creates holes on the main canvas (default number of holes: 2) 
+* **Additive Noise:** affects the regression values.
+* **Multiplicative Noise:** affects the regression values.
 
 QUI IMMAGINE DEFORMATION
 
@@ -58,10 +60,10 @@ In particular, the deformation parameter acts on the image to change it from the
 ### Multivariate distribution:
 
 Each of the latent variables and the uncertainty measures can be described by one of the following distributions
-* Constant (fix the value of a latent variable to simplify the problem)
-* Uniform distribution (equivalent to generating all possibilities)
-* Gaussian distribution
-* Truncated Gaussian
+* *Constant* (fix the value of a latent variable to simplify the problem)
+* *Uniform distribution* (equivalent to generating all possibilities)
+* *Gaussian distribution*
+* *Truncated Gaussian*
 
 In addition, each of the above distributions is associated with a correlation matrix, which makes it possible to generate a corresponding multivariate distribution according to Sklar's theorem.  Thus, the latent variables can be generated to be dependent on each other.
 
