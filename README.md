@@ -20,6 +20,22 @@ If you use this dataset in your work, please cite it as follows:
 
 NA_DA can generate datasets of 2D shapes with customizable dataset attributes, latent variables, uncertainty, deformation and their multivariate distributions.
 
+## Requirements
+
+NA_DA requires python v.3.8+ and the follwing external packages installed:
+
+| package | min. version |
+| ----------- | ----------- |
+| tkinter | 8.5 |
+| customtkinter | 5.2.2 |
+| CTkMessagebox | 2.5 |
+| numpy | 1.22.3 |
+| pandas | 1.5.3 |
+| opencv-python | 4.8.1.78 |
+| Pillow | 10.1.0 |
+| openturns | 1.23 |
+| setuptools | 45.2.0 |
+
 ## User defined parameters
 
 ### Dataset Attributes:
