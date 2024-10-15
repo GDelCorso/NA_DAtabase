@@ -42,7 +42,7 @@ latents_classes: (737280 x 6, int64) Integer index of the latent factor values. 
 metadata: some additional information, including the possible latent values.
 Alternatively, a HDF5 version is also available, containing the same data, packed as Groups and Datasets.
 
-##Multivariate distribution:
+## Multivariate distribution:
 Each of the latent variables and the uncertainty measures can be described by one of the following distributions
 * Constant (fix the value of a latent variable to simplify the problem)
 * Uniform distribution (equivalent to generating all possibilities)
