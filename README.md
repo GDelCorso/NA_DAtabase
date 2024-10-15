@@ -41,7 +41,7 @@ The generator can be used to define different databasets according to user-defin
 * **Center Y:** position of the center on the Y axes, identified by a percentage on the length of the Y axes. 
 
 <p align="center">
-  <img width="460" src="./NA_DAtabase_GUI/img_example.png">
+  <img width="800" src="./NA_DAtabase_GUI/img_example.png">
 </p>
 
 ### Uncertainty Related Latent Variables:
