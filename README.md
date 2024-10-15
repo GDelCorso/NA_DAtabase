@@ -19,7 +19,7 @@ If you use this dataset in your work, please cite it as follows:
 NA_DA can generate datasets of 2D shapes with customizable dataset attributes, latent variables, uncertainty and deformation and their multivariate distributions.
 
 ## Dataset Attributes:
-
+The generator can be used to define different databases according to user-defined parameters. In particular
 * Dataset size: the maximum number of generated images.
 * Sampling strategy: define the technique for sampling a probability distribution (Monte Carlo, Latin HyperCube Sampling, or Low Discrepancy Sequence).
 * Random seed: the number used to initialize the random generator.
