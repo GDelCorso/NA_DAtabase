@@ -1,8 +1,11 @@
 # NA_DA: Not-A-DAtabase generator of probabilistic synthetic data 
 
-![anim](https://github.com/user-attachments/assets/22cff88b-ac69-4542-81b3-13318474b0a3)
+<p align="center">
+ ![anim](https://github.com/user-attachments/assets/22cff88b-ac69-4542-81b3-13318474b0a3)
+</p>
 
 NA_DA is an open-source software written in Python that generates datasets of regular two-dimensional geometric shapes based on probabilistic distributions.
+
 NA_DA comes with an intuitive GUI (Graphical User Interface) that allows users to define shapes, colors, and distributions of features of datasets consisting of image sets and CSV files containing metadata for each element. These databases can be saved to provide a unique identifier of the dataset, allowing perfect reproducibility or easy modification of the dataset using the GUI or directly by calling the generator class. Therefore, NA_DA is a tool to help and support the investigation of trustworthiness, overconfidence, uncertainty, and computation time of machine learning and deep learning models.
  
 If you use this dataset in your work, please cite it as follows:
@@ -16,12 +19,12 @@ If you use this dataset in your work, please cite it as follows:
 }
 ```
 
-NA_DA can generate datasets of 2D shapes with customizable dataset attributes, latent variables, uncertainty and deformation and their multivariate distributions.
+NA_DA can generate datasets of 2D shapes with customizable dataset attributes, latent variables, uncertainty, deformation and their multivariate distributions.
 
 ## User defined parameters:
 
 ### Dataset Attributes:
-The generator can be used to define different databases according to user-defined parameters. In particular
+The generator can be used to define different databasets according to user-defined parameters. In particular
 * **Dataset size:** the maximum number of generated images.
 * **Sampling strategy:** define the technique for sampling a probability distribution (Monte Carlo, Latin HyperCube Sampling, or Low Discrepancy Sequence).
 * **Random seed:** the number used to initialize the random generator.
@@ -53,7 +56,9 @@ Every image can be associated to a level of uncertainty.
 * **Additive Noise:** affects the regression values.
 * **Multiplicative Noise:** affects the regression values.
 
-QUI IMMAGINE DEFORMATION
+<p align="center">
+  <img width="460" src="./NA_DAtabase_GUI/img_morph.png">
+</p>
 
 In particular, the deformation parameter acts on the image to change it from the original shape (i.e. an arbitrary regular polygon) to the circle.  This is directly related to the ability of the model to correctly identify deformed shapes as unreliable predictions.
 
