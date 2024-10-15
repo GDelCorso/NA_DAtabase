@@ -79,7 +79,7 @@ This dataset was created as a test of disentanglement properties of unsupervised
 
 ### Uncertainty Quantification and Reliability:
 
-This database generator is suitable for uncertainty quantification and reliability analysis on synthetic images (i.e., to test models developed using Bayesian formalism). In particular, different levels of uncertainty (both Epistemic and Aleatoric) can be imposed on the dataset to assess the ability of the model to produce correct reliability estimates.
+This database generator is suitable for uncertainty quantification and reliability analysis on synthetic images (i.e., to test models developed using Bayesian formalism). In particular, different levels of uncertainty (both epistemic and aleatoric) can be imposed on the dataset to assess the ability of the model to produce correct reliability estimates.
 
 A detailed description of type of uncertainties and probabilistic models can be found in:
 
