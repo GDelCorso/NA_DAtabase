@@ -20,7 +20,7 @@ If you use this dataset in your work, please cite it as follows:
 
 NA_DA can generate datasets of 2D shapes with customizable dataset attributes, latent variables, uncertainty, deformation and their multivariate distributions.
 
-## User defined parameters:
+## User defined parameters
 
 ### Dataset Attributes:
 The generator can be used to define different databasets according to user-defined parameters. In particular:
@@ -71,7 +71,7 @@ Each of the latent variables and the uncertainty measures can be described by on
 
 In addition, each of the above distributions is associated with a correlation matrix, which makes it possible to generate a corresponding multivariate distribution according to Sklar's theorem.  Thus, the latent variables can be generated to be dependent on each other.
 
-## Examples of use:
+## Examples of use
 
 ### Disentanglement metrics:
 
