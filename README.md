@@ -40,7 +40,7 @@ metadata: some additional information, including the possible latent values.
 Alternatively, a HDF5 version is also available, containing the same data, packed as Groups and Datasets.
 
 ## Disentanglement metric
-This dataset was created as a unit test of disentanglement properties of unsupervised models. It can be used to determine how well models recover the ground truth latents presented above.
+This dataset was created as a unit test of disentanglement properties of unsupervised models under different probability distributions of the latent variables. NA_DA can be used to determine how well models recover the ground truth latents presented above, especially when their distributions are altered compared to the standard uniform ones proposed in most synthetic datasets.
 
 ## Uncertainty measures
 
