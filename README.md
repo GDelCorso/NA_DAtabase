@@ -75,7 +75,7 @@ In addition, each of the above distributions is associated with a correlation ma
 
 ### Disentanglement metrics:
 
-This dataset was created as a unit test of disentanglement properties of unsupervised models under different probability distributions of the latent variables. NA_DA can be used to determine how well models recover the ground truth latent presented above, especially when their distributions are altered compared to the standard uniform ones proposed in most synthetic datasets.
+This dataset was created as a test of disentanglement properties of unsupervised models under different probability distributions of the latent variables. NA_DA can be used to determine how well models recover the ground truth latent presented above, especially when their distributions are altered compared to the standard uniform ones proposed in most synthetic datasets.
 
 ### Uncertainty Quantification and Reliability:
 
