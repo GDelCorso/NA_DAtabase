@@ -20,12 +20,12 @@ NA_DA can generate datasets of 2D shapes with customizable dataset attributes, l
 
 ## Dataset Attributes
 
-Dataset size:
-Sampling strategy: 
-Random seed:
-Resolution:
-Background color:
-Allow out of border:
+* Dataset size:
+* Sampling strategy: 
+* Random seed:
+* Resolution:
+* Background color:
+* Allow out of border:
 
 ## Latent factor values
 
