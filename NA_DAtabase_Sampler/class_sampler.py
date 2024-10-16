@@ -933,7 +933,7 @@ class MorphShapes_DB_Builder:
 				proc = Process(target=self.add_row, args=(index,row, area, area_noise))
 				procs.append(proc)
 				proc.start()
-				print ("processing %d" % index)
+				#print ("processing %d" % index)
 				
 				if(index % total_threads == 0):
 					for proc in procs:
