@@ -1,0 +1,6 @@
+numpy
+tkinter
+customtkinter
+CTkMessagebox
+pandas
+openturns
