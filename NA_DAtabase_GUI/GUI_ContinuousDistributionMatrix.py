@@ -83,9 +83,9 @@ class ContinuousDistributionMatrix():
 			self.add_row(f, i, r)
 			r = r + 1
 
-		CTkButton(f, text='-%s' % ContinuousVariableHelper.infinity, command=self._add_negative_inf).grid(row=r, column=2, padx=5, pady=5,sticky='we')
+		#CTkButton(f, text='-%s' % ContinuousVariableHelper.infinity, command=self._add_negative_inf).grid(row=r, column=2, padx=5, pady=5,sticky='we')
 		
-		CTkButton(f, text='+%s' % ContinuousVariableHelper.infinity, command=self._add_positive_inf).grid(row=r, column=5, padx=5, pady=5,sticky='we')
+		#CTkButton(f, text='+%s' % ContinuousVariableHelper.infinity, command=self._add_positive_inf).grid(row=r, column=5, padx=5, pady=5,sticky='we')
 		
 	def _add_negative_inf(self):
 		x,y = self._coords
@@ -125,15 +125,16 @@ class ContinuousDistributionMatrix():
 		if len(value) == 0:
 			return
 		
-		if i==0 and value == ContinuousVariableHelper.N_INF():
-			return
+		if (value == ContinuousVariableHelper.N_INF() or value == ContinuousVariableHelper.P_INF()):
+			return self.error(e, "Error: %s can't be %s." % (ContinuousVariableHelper.title(ContinuousVariableHelper.index[i]), value))
 
+		'''
 		if i==3 and value == ContinuousVariableHelper.P_INF():
 			return
 
 		if i==0 and value == ContinuousVariableHelper.P_INF() or i==3 and value == ContinuousVariableHelper.N_INF():
 			return self.error(e, "Error: %s can't be %s." % (ContinuousVariableHelper.title(ContinuousVariableHelper.index[i]), value))
-
+		'''
 		try:
 			value = float(value)
 			

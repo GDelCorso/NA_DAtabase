@@ -1,2 +1,2 @@
 dataset_size,sampling_strategy,random_seed,pixel_resolution_x,pixel_resolution_y,correct_classes,background_color,out_of_border,correlation
-200,MC,1520,128,128,,"(86, 127, 62)",True,Spearman
+200,MC,1520,128,128,,"(0, 0, 0)",True,Spearman

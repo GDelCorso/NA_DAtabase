@@ -218,7 +218,7 @@ class random_sampler:
 				.replace(np.nan, None).to_list()
 			self.out_of_border = \
 				[i for i in self.out_of_border if i is not None][0]   
-				
+			
 			self.background_color = \
 				self.sampler_properties['background_color'][0]
 				
@@ -767,10 +767,11 @@ class random_sampler:
 							resampler_seed += 1
 							row = tmp_sample_df.iloc[i_row]
 							centre_x = float(row['centre_x'])
-							centre_y = float(row['centre_x'])
+							centre_y = float(row['centre_y'])
 							radius = float(row['radius'])
 							
 							# Check if centre is too close to the border:
+							
 							find_another = 0
 							if (centre_x<radius)or(centre_x>100-radius)or\
 									(centre_y<radius)or(centre_y>100-radius):
@@ -790,7 +791,7 @@ class random_sampler:
 									centre_x_resampled = \
 											   float(row_resampled['centre_x'])
 									centre_y_resampled = \
-											   float(row_resampled['centre_x'])
+											   float(row_resampled['centre_y'])
 									radius_resampled = \
 												 float(row_resampled['radius'])
 									
@@ -804,6 +805,12 @@ class random_sampler:
 										 # Change the original row:
 										 tmp_sample_df.iloc[i_row] = \
 																  row_resampled 
+							
+							# SPOSTA IL CENTRO ENTOR IL CANVAS DI UNA QUANTITA X E Y
+							# RANDOM MA SICURAMENTE MAGIGORE DEI DELTA X E Y
+							
+
+
 				# Latin Hyper Cube Sampling
 				elif self.sampling_strategy == 'LHC':
 					exp = ot.LHSExperiment(multi_distribution, \
