@@ -961,7 +961,7 @@ class MorphShapes_DB_Builder:
 		area = [x[1] for x in sorted(area.items())]
 		area_noise = [x[1] for x in sorted(area_noise.items())]
 		
-		print(len(area), len(area_noise))
+		#print(len(area), len(area_noise))
 
 		
 			
@@ -978,8 +978,7 @@ class MorphShapes_DB_Builder:
 		w, h = row['pixel_resolution_x'], row['pixel_resolution_y']
 		M = Main_Surface(w, h) 
 
-		background = self._get_tuple_or_value(row['background_color'], 
-														 [(0, 1),(0, 255)])
+		background = self._get_tuple_or_value(row['background_color']) #self._get_tuple_or_value(row['background_color'], [(0, 1),(0, 255)])
 
 		#
 		# the backbround can be 
@@ -1080,7 +1079,7 @@ class MorphShapes_DB_Builder:
 		#print(area,area_noise)
 		
 	
-	def _get_tuple_or_value(self, cell, map_range):
+	def _get_tuple_or_value(self, cell, map_range = None):
 		# 
 		# check a cell string value if is a tuple
 		# and eventually convert it, remapping the values
@@ -1098,14 +1097,14 @@ class MorphShapes_DB_Builder:
 		# es: to remap range 0,1 to 0,255 map_range is:
 		# [ (0, 1), (0, 255) ]
 		# 
-		_mra, _mrb = map_range
-		_min, _max, = _mra
-		_a, _b = _mrb
+		if map_range != None:
+			_mra, _mrb = map_range
+			_min, _max, = _mra
+			_a, _b = _mrb
 		
 		if type(value) is list:
-			value = tuple(map(lambda v: round((_b -_a) * (v - _min) / (_max - _min) +_a), value))
-			return value 
-
+			return tuple(map(lambda v: round(v), value)) if map_range == None else tuple(map(lambda v: round((_b -_a) * (v - _min) / (_max - _min) +_a), value))
+			
 		value = (_b - _a) * (value - _min) / (_max - _min) +_a 
 		return round(value) if rounded else value        
 		
