@@ -281,14 +281,14 @@ class SamplerPropertiesMatrix():
 
 	def load(self, path):
 		sp = (pd.read_csv(os.path.join(path, self.csv))).to_dict()
-
+		print(sp)
 		for x in sp:
 			if x == 'pixel_resolution_x' or x == 'pixel_resolution_y':
 				self.data['resolution'].set(sp[x][0])
 			elif x == 'correct_classes':
 				# TODO
-				
-				if(np.isnan(sp[x][0]) == False):
+				if(type(sp[x][0]) == str):
+					print ("QUI?")
 					self.list1 = list(sp[x].values())
 					self.update_textbox()
 			elif x == 'out_of_border' and sp[x][0]:
