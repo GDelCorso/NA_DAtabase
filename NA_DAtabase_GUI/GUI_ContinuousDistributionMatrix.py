@@ -211,7 +211,6 @@ class ContinuousDistributionMatrix():
 		# print(cd)
 		for i in range(len(self.continuous_variables)):
 			l = cd[self.continuous_variables[i]].tolist()
-			print(l)
 			self._set_cbox_value(i, l)
 			self.lock(ContinuousVariableHelper.get_cbox_value(l), i)
 			for j in range(len(l)):

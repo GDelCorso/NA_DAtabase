@@ -285,9 +285,7 @@ class SamplerPropertiesMatrix():
 			if x == 'pixel_resolution_x' or x == 'pixel_resolution_y':
 				self.data['resolution'].set(sp[x][0])
 			elif x == 'correct_classes':
-				# TODO
 				if(type(sp[x][0]) == str):
-					print ("QUI?")
 					self.list1 = list(sp[x].values())
 					self.update_textbox()
 			elif x == 'out_of_border' and sp[x][0]:
