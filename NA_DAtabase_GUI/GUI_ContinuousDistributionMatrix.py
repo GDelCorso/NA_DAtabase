@@ -211,11 +211,22 @@ class ContinuousDistributionMatrix():
 		# print(cd)
 		for i in range(len(self.continuous_variables)):
 			l = cd[self.continuous_variables[i]].tolist()
+			print(l)
+			self._set_cbox_value(i, l)
 			self.lock(ContinuousVariableHelper.get_cbox_value(l), i)
 			for j in range(len(l)):
 				e = self.entries[i][j]
 				EntryHelper.update_value(e,str(l[j]).replace("inf", ContinuousVariableHelper.infinity,))
 	
+	def _set_cbox_value(self, i, l):
+		cbox_value = 'truncated_gaussian' 
+		if l[0] == '' and l[3] == '':
+			cbox_value = 'constant'	if l[2] == '' else 'gaussian'
+		if l[1] == '' and l[2] == '':
+			cbox_value = 'uniform' 
+		self.cbox[i].set(cbox_value)
+
+
 	def _throw_error(self):
 		msg = "Unable to save %s" % self.csv
 		self.parent.error_msg(msg)
