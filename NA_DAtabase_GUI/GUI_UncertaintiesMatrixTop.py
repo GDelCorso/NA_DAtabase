@@ -232,12 +232,12 @@ class UncertaintiesMatrixTop(CTkToplevel):
 			value = float(value)
 			
 			if value < min_value:
-				self.parent.parent.error_msg("Error: %s must be greater than %s." % (ContinuousVariableHelper.title(ContinuousVariableHelper.index[i]), str(min_value)))
+				self.parent.parent.error_msg("Error: %s greater than or equal %s." % (ContinuousVariableHelper.title(ContinuousVariableHelper.index[i]), str(min_value)))
 				EntryHelper.update_value(e,self._last_value)
 				return
 		
 			if max_value > 0 and value > max_value:
-				self.parent.parent.error_msg("Error: %s must be lower than %s." % (ContinuousVariableHelper.title(ContinuousVariableHelper.index[i]), str(max_value)))
+				self.parent.parent.error_msg("Error: %s must be lower than or equal %s." % (ContinuousVariableHelper.title(ContinuousVariableHelper.index[i]), str(max_value)))
 				EntryHelper.update_value(e,self._last_value)
 				return
 
@@ -254,7 +254,7 @@ class UncertaintiesMatrixTop(CTkToplevel):
 			
 			if len(l_value) > 0 and len(u_value) > 0:
 				if float(l_value) >= float(u_value):
-					self.parent.parent.error_msg("Error: %s must be greater than %s." % (ContinuousVariableHelper.title(ContinuousVariableHelper.index[3]),ContinuousVariableHelper.title(ContinuousVariableHelper.index[0])))
+					self.parent.parent.error_msg("Error: %s greater than or equal %s." % (ContinuousVariableHelper.title(ContinuousVariableHelper.index[3]),ContinuousVariableHelper.title(ContinuousVariableHelper.index[0])))
 					EntryHelper.update_value(e,self._last_value)
 					return False
 

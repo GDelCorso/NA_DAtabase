@@ -60,6 +60,9 @@ class ContinuousDistributionMatrix():
 		}
 
 		self.ranges = {
+			'radius': {
+				'upper_bound': 50
+			},
 			'rotation_(degrees)': {
 				'upper_bound': 360
 			}
@@ -139,10 +142,10 @@ class ContinuousDistributionMatrix():
 			value = float(value)
 			
 			if value < min_value:
-				return self.error(e, "Error: %s must be greater than %s." % (ContinuousVariableHelper.title(ContinuousVariableHelper.index[i]), str(min_value)))
+				return self.error(e, "Error: %s must be greater than or equal %s." % (ContinuousVariableHelper.title(ContinuousVariableHelper.index[i]), str(min_value)))
 		
 			if value > max_value:
-				return self.error(e, "Error: %s must be lower than %s." % (ContinuousVariableHelper.title(ContinuousVariableHelper.index[i]), str(max_value)))
+				return self.error(e, "Error: %s must be lower than or equal %s." % (ContinuousVariableHelper.title(ContinuousVariableHelper.index[i]), str(max_value)))
 
 			l = self.entries[row][0]
 			l_value = l.get().strip()
@@ -155,7 +158,7 @@ class ContinuousDistributionMatrix():
 			
 			if len(l_value) > 0 and len(u_value) > 0:
 				if (l_value != ContinuousVariableHelper.N_INF() and u_value != ContinuousVariableHelper.P_INF() and float(l_value) >= float(u_value)):
-					return self.error(e, "Error: %s must be greater than %s." % (ContinuousVariableHelper.title(ContinuousVariableHelper.index[3]),ContinuousVariableHelper.title(ContinuousVariableHelper.index[0])))
+					return self.error(e, "Error: %s must be greater than or equal %s." % (ContinuousVariableHelper.title(ContinuousVariableHelper.index[3]),ContinuousVariableHelper.title(ContinuousVariableHelper.index[0])))
 
 			#self.success_msg("%s inserted successfully." % ContinuousVariableHelper.title(ContinuousVariableHelper.index[i]))
 			return True
