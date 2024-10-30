@@ -1284,7 +1284,19 @@ class Shape:
 		if(mark_first_vertex):
 			R = self._radius * self._up_factor
 			cx, cy = self._shape_canvas.center()
-			center = (cx, cy - R // 3) #self._rotate_point((cx, cy - R // 3), self._shape_canvas.center(), -self._rotation)
+
+			if self._sides == 3:
+				factor = R // 3
+
+			if self._sides > 3:
+				factor = R // 2	
+
+			if self._sides == 0 or self._morph_percentage > 30:
+				factor = 2 * R // 3	
+			
+			
+			
+			center = (cx, cy - factor) #self._rotate_point((cx, cy - R // 3), self._shape_canvas.center(), -self._rotation)
 			
 			hole_radius = R // 8 if R // 8 > 0 else 1
 
