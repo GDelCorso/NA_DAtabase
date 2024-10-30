@@ -1437,6 +1437,14 @@ class Shape:
 			mask
 		)
 
+		if self._sides % 2 == 0:
+			c = c.rotate(
+				-alpha, 
+				Image.Resampling.BILINEAR, 
+				expand =False
+			)
+
+
 		self._shape_canvas.set_image(c)
 
 	def refillblack(self, image, background_color):
@@ -1494,8 +1502,8 @@ class Shape:
 		# if the shape has an even number of sides, and NOT a circle (0)
 		# a pre-rotation is applied
 		# 
-		# if (self._sides % 2 == 0) and (self._sides != 0):   
-		# 	top = self._rotate_point(top, center, 180 // self._sides)
+		if (self._sides % 2 == 0) and (self._sides != 0):   
+			top = self._rotate_point(top, center, 180 // self._sides)
 		
 		for i in range(self._sides):
 			vertices.append(self._rotate_point(top, center, i * 360 / self._sides))
