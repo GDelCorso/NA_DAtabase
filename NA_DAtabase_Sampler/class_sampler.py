@@ -1032,15 +1032,15 @@ class MorphShapes_DB_Builder:
 		morph_percentage = min(max(row['deformation'], 0), 100)
 
 		M.drawShape(
-			Shape(
+			shape = Shape(
 				center = center,
 				radius = radius,
 				color = color, 
 				sides = sides, 
 				rotation = rotation,
 				morph_percentage = morph_percentage
-			)
-
+			),
+			mark_first_vertex = False #TODO: read property csv
 		)
 
 		# 
@@ -1049,7 +1049,7 @@ class MorphShapes_DB_Builder:
 		holes = int(row['holes'])
 		if(holes > 1):
 			M.emmental(holes, index)
-
+		
 		area[index] = (round(M.filled_area, 3))
 
 		mnr, anr = row['multiplicative_noise_regression'], row['additive_noise_regression']
@@ -1245,7 +1245,7 @@ class Shape:
 	def shape_canvas(self):
 		return self._shape_canvas
 
-	def draw(self, anti_aliasing = True):
+	def draw(self, anti_aliasing = True, mark_first_vertex = False):
 		canvas_side = (self._radius * 2 + 1) * self._up_factor
 		self._shape_canvas = PIL_Drawing(canvas_side, canvas_side)
 
@@ -1268,11 +1268,26 @@ class Shape:
 			# 
 			# the poly is possibly morphed and rotated
 			# 
-			self._morph()
-			self._rotate(anti_aliasing)
 		else:
 			print("Warning: Wrong size definition == 2")
-					
+		
+		if(mark_first_vertex):
+			R = self._radius * self._up_factor
+			cx, cy = self._shape_canvas.center()
+			center = (cx, cy - R // 3) #self._rotate_point((cx, cy - R // 3), self._shape_canvas.center(), -self._rotation)
+			
+			hole_radius = R // 8 if R // 8 > 0 else 1
+
+			self._shape_canvas.circle(
+				center,
+				hole_radius,
+				(0, 0, 0),
+				-1
+			)
+			
+		self._morph()
+		self._rotate(anti_aliasing)
+		
 		# 
 		# the final image is resized to its original size,
 		# using AA filter if required
@@ -1289,9 +1304,11 @@ class Shape:
 		)
 
 	def _rotate(self, anti_aliasing):    
+		'''
 		if self._rotation == 0 or self._sides == 0:
 			return
-
+		'''
+		
 		resampling = Image.Resampling.BILINEAR if anti_aliasing else Image.Resampling.NEAREST
 
 		rot = self._shape_canvas.image().rotate(
@@ -1455,8 +1472,8 @@ class Shape:
 		# if the shape has an even number of sides, and NOT a circle (0)
 		# a pre-rotation is applied
 		# 
-		if (self._sides % 2 == 0) and (self._sides != 0):   
-			top = self._rotate_point(top, center, 180 // self._sides)
+		# if (self._sides % 2 == 0) and (self._sides != 0):   
+		# 	top = self._rotate_point(top, center, 180 // self._sides)
 		
 		for i in range(self._sides):
 			vertices.append(self._rotate_point(top, center, i * 360 / self._sides))
@@ -1486,14 +1503,14 @@ class Main_Surface:
 			Image.Resampling.BICUBIC
 		)
 		
-	def drawShape(self, shape, anti_aliasing = True):
+	def drawShape(self, shape, anti_aliasing = True, mark_first_vertex = False):
 		if self.shape != None:
 			return
 		# 
 		# add a shape and draw it in the main canvas
 		# 
 		
-		shape.draw(anti_aliasing)
+		shape.draw(anti_aliasing, mark_first_vertex)
 
 		cx, cy = shape.center()
 		R = shape.radius()
@@ -1593,7 +1610,6 @@ class Main_Surface:
 				(0, 0, 0),
 				-1
 			)
-
 
 	def show(self):
 		# 

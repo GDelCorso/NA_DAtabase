@@ -25,6 +25,7 @@ class SamplerPropertiesMatrix():
 			'resolution': StringVar(),
 			'background_color': StringVar(),
 			'out_of_border': StringVar(),
+			'mark_first_vertex': StringVar(),
 			'correlation': StringVar(),
 			'cc': {
 				'shape': StringVar(),
@@ -89,10 +90,15 @@ class SamplerPropertiesMatrix():
 		self.c.deselect()
 		self.c.grid(row=5, column=1, padx=5, sticky='we')
 		
-		CTkLabel(lf, text='Correlation:', anchor="e").grid(row=6, column=0, padx=5, pady=5, sticky='we')
+		CTkLabel(lf, text='Mark first vertex:', anchor="e").grid(row=6, column=0, padx=5, pady=5, sticky='we')
+		self.mv = CTkCheckBox(lf, text="", variable=self.data['mark_first_vertex'])
+		self.mv.deselect()
+		self.mv.grid(row=6, column=1, padx=5, sticky='we')
+		
+		CTkLabel(lf, text='Correlation:', anchor="e").grid(row=7, column=0, padx=5, pady=5, sticky='we')
 		cor = CTkComboBox(lf, values=["Spearman"], variable=self.data['correlation'], state="readonly")
 		cor.set("Spearman")
-		cor.grid(row=6, column=1, padx=5, sticky='we')
+		cor.grid(row=7, column=1, padx=5, sticky='we')
 
 		rf = CTkFrame(tab)
 		rf.grid_columnconfigure((0,1,2,3), weight=1)
@@ -249,7 +255,7 @@ class SamplerPropertiesMatrix():
 
 		try:
 			bg_color = str(self.data['background_color'].get())
-			csvdata = np.empty((rows,9), dtype=object)
+			csvdata = np.empty((rows,10), dtype=object)
 			csvdata[0][0] = int(self.data['dataset_size'].get())
 			csvdata[0][1] = self.data['sampling_strategy'].get()
 			csvdata[0][2] = int(self.data['random_seed'].get())
@@ -258,13 +264,14 @@ class SamplerPropertiesMatrix():
 			csvdata[0][5] = self.list1[0] if len(self.list1) else None
 			csvdata[0][6] = bg_color
 			csvdata[0][7] = True if self.data['out_of_border'].get() == '1' else False 
+			csvdata[0][8] = True if self.data['mark_first_vertex'].get() == '1' else False 
 			
-			csvdata[0][8] = self.data['correlation'].get()
+			csvdata[0][9] = self.data['correlation'].get()
 			
 			for row in range(1,rows):
 				csvdata[row][5] = self.list1[row] if row < len(self.list1) else None
 			
-			head = ['dataset_size', 'sampling_strategy', 'random_seed', 'pixel_resolution_x', 'pixel_resolution_y', 'correct_classes', 'background_color', 'out_of_border', 'correlation']
+			head = ['dataset_size', 'sampling_strategy', 'random_seed', 'pixel_resolution_x', 'pixel_resolution_y', 'correct_classes', 'background_color', 'out_of_border', 'mark_first_vertex', 'correlation']
 
 			path_data = PathHelper.get_db_path()
 			path_data = os.path.join(path_data, db_name)
@@ -292,6 +299,9 @@ class SamplerPropertiesMatrix():
 				self.data[x].set(1)
 				self.c.select()
 				self.mc()
+			elif x == 'mark_first_vertex' and sp[x][0]:
+				self.data[x].set(1)
+				self.mv.select()
 			else:
 				self.data[x].set(sp[x][0])
 				if x == 'background_color':
