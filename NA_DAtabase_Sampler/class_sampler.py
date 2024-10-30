@@ -216,9 +216,16 @@ class random_sampler:
 			
 			self.out_of_border = self.sampler_properties['out_of_border']\
 				.replace(np.nan, None).to_list()
+			
 			self.out_of_border = \
 				[i for i in self.out_of_border if i is not None][0]   
 			
+			self.mark_first_vertex = self.sampler_properties['mark_first_vertex']\
+				.replace(np.nan, None).to_list()
+			
+			self.mark_first_vertex = \
+				[i for i in self.mark_first_vertex if i is not None][0]   
+
 			self.background_color = \
 				self.sampler_properties['background_color'][0]
 				
@@ -532,6 +539,8 @@ class random_sampler:
 		# Add pixel resolution
 		sample_df['pixel_resolution_x'] = self.pixel_resolution_x
 		sample_df['pixel_resolution_y'] = self.pixel_resolution_y
+		
+		sample_df['mark_first_vertex'] = self.mark_first_vertex
 		
 		# Define the regression ground truth - radius
 		sample_df['regression_radius'] = sample_df['radius']
@@ -1031,6 +1040,7 @@ class MorphShapes_DB_Builder:
 		rotation = row['rotation_(degrees)']
 		morph_percentage = min(max(row['deformation'], 0), 100)
 
+		
 		M.drawShape(
 			shape = Shape(
 				center = center,
@@ -1040,7 +1050,7 @@ class MorphShapes_DB_Builder:
 				rotation = rotation,
 				morph_percentage = morph_percentage
 			),
-			mark_first_vertex = False #TODO: read property csv
+			mark_first_vertex = row['mark_first_vertex'] #TODO: read property csv
 		)
 
 		# 
