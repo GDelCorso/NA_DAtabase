@@ -338,21 +338,21 @@ class random_sampler:
 		
 		# rotation - Continuous - IF CIRCLE, set up to 0   
 		temp_variable_name = 'rotation_(degrees)'
-		if shape == '0':
-			# Circles are rotation invariant
-			distribution = marginal_continuous_distribution(mu=0)
-			marginal_list_names.append(temp_variable_name)
-			marginal_list.append(distribution)
-		else:
-			distribution = marginal_continuous_distribution(
-				self.continuous_variables[temp_variable_name][0], 
-				self.continuous_variables[temp_variable_name][1], 
-				self.continuous_variables[temp_variable_name][2], 
-				self.continuous_variables[temp_variable_name][3])
-			
-			marginal_list_names.append(temp_variable_name)
-			marginal_list.append(distribution)
+		#if shape == '0':
+		#	# Circles are rotation invariant
+		#	distribution = marginal_continuous_distribution(mu=0)
+		#	marginal_list_names.append(temp_variable_name)
+		#	marginal_list.append(distribution)
+		#else:
+		distribution = marginal_continuous_distribution(
+			self.continuous_variables[temp_variable_name][0], 
+			self.continuous_variables[temp_variable_name][1], 
+			self.continuous_variables[temp_variable_name][2], 
+			self.continuous_variables[temp_variable_name][3])
 		
+		marginal_list_names.append(temp_variable_name)
+		marginal_list.append(distribution)
+	
 		self.marginal_list_names = marginal_list_names
 		self.marginal_list = marginal_list
 		
@@ -1040,7 +1040,7 @@ class MorphShapes_DB_Builder:
 		rotation = row['rotation_(degrees)']
 		morph_percentage = min(max(row['deformation'], 0), 100)
 
-		
+
 		M.drawShape(
 			shape = Shape(
 				center = center,
