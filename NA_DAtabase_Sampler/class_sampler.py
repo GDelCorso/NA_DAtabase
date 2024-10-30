@@ -1298,6 +1298,9 @@ class Shape:
 			
 			center = (cx, cy - factor) #self._rotate_point((cx, cy - R // 3), self._shape_canvas.center(), -self._rotation)
 			
+			if self._sides % 2 == 0:
+				center = self._rotate_point(center, self._shape_canvas.center(), 180 // self._sides)
+				
 			hole_radius = R // 8 if R // 8 > 0 else 1
 
 			self._shape_canvas.circle(
