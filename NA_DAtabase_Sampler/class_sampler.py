@@ -930,7 +930,7 @@ class MorphShapes_DB_Builder:
 
 	def generate(self):
 		import psutil
-		total_threads = psutil.cpu_count()/psutil.cpu_count(logical=False) * psutil.cpu_count() * 4
+		total_threads = psutil.cpu_count() / psutil.cpu_count(logical=False) * psutil.cpu_count()
 		'''
 		Generates the shape in the canvas based on csv data
 		'''
@@ -1298,7 +1298,7 @@ class Shape:
 			
 			center = (cx, cy - factor) #self._rotate_point((cx, cy - R // 3), self._shape_canvas.center(), -self._rotation)
 			
-			if self._sides % 2 == 0:
+			if self._sides % 2 == 0 and self._sides > 0:
 				center = self._rotate_point(center, self._shape_canvas.center(), 180 // self._sides)
 				
 			hole_radius = R // 8 if R // 8 > 0 else 1

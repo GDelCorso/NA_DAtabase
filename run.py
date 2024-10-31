@@ -163,6 +163,7 @@ class App(CTk):
 		from multiprocessing import get_start_method
 
 		self.pbLabel.grid(row=0, column=3, padx=5)
+		self.pbLabel.configure(text="Preparing data...")
 		self.pb.grid(row=0, column=4, padx=15, sticky="ew")
 
 		self.tabinfo.configure(state="disabled")
@@ -171,6 +172,8 @@ class App(CTk):
 		self.message_box.grid_forget()
 		self.tabview.grid_forget()
 		
+		self.update() #refresh the gui
+
 		gui = self
 
 		if get_start_method() == 'fork':
