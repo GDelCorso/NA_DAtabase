@@ -91,6 +91,7 @@ In addition, each of the above distributions is associated with a correlation ma
 There are 2 utility functions to evaluate the quality of the generated dataset given the path of the main folder:
 - **test_empirical_distributions :** Provides multiple views of the empirical distribution of the variables characterizing the data set and their correlation values.
 - **test_function_show :** Generates random views of a sample of the dataset coupled with the image parameters to verify correct data generation.
+- 
 The images are stored in the **test_empirical** and **test_views** folders, respectively.
 
 
