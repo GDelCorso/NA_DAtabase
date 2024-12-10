@@ -87,6 +87,14 @@ Each of the latent variables and the uncertainty measures can be described by on
 
 In addition, each of the above distributions is associated with a correlation matrix, which makes it possible to generate a corresponding multivariate distribution according to Sklar's theorem.  Thus, the latent variables can be generated to be dependent on each other.
 
+## Test functions:
+There are 2 utility functions to evaluate the quality of the generated dataset given the path of the main folder:
+- **test_empirical_distributions :** Provides multiple views of the empirical distribution of the variables characterizing the data set and their correlation values.
+- **test_function_show :** Generates random views of a sample of the dataset coupled with the image parameters to verify correct data generation.
+The images are stored in the **test_empirical** and **test_views** folders, respectively.
+
+
+
 ## Examples of use
 
 ### Disentanglement metrics:
@@ -100,5 +108,3 @@ This database generator is suitable for uncertainty quantification and reliabili
 A detailed description of type of uncertainties and probabilistic models can be found in:
 
 *“Shedding light on Uncertainties in Machine Learning: formal derivation and optimal model selection”*, Del Corso, S. Colantonio, G. Caudai, C. et. al. 
-
-
