@@ -1300,7 +1300,7 @@ class Shape:
 			
 			if self._sides % 2 == 0 and self._sides > 0:
 				center = self._rotate_point(center, self._shape_canvas.center(), 180 // self._sides)
-				
+			
 			hole_radius = R // 8 if R // 8 > 0 else 1
 
 			self._shape_canvas.circle(
@@ -1311,6 +1311,13 @@ class Shape:
 			)
 			
 		self._morph()
+		if self._sides % 2 == 0 and self._sides > 0:
+			self._shape_canvas.set_image(self._shape_canvas.image().rotate(
+				-180 // self._sides, 
+				Image.Resampling.BILINEAR, 
+				expand =False
+			))
+		
 		self._rotate(anti_aliasing)
 		
 		# 
@@ -1440,13 +1447,14 @@ class Shape:
 			mask
 		)
 
+		'''
 		if self._sides % 2 == 0:
 			c = c.rotate(
 				-alpha, 
 				Image.Resampling.BILINEAR, 
 				expand =False
 			)
-
+		'''
 
 		self._shape_canvas.set_image(c)
 
@@ -1505,6 +1513,7 @@ class Shape:
 		# if the shape has an even number of sides, and NOT a circle (0)
 		# a pre-rotation is applied
 		# 
+		
 		if (self._sides % 2 == 0) and (self._sides != 0):   
 			top = self._rotate_point(top, center, 180 // self._sides)
 		
