@@ -594,6 +594,7 @@ class random_sampler:
 		temp_df_path_uncertainties_classification_noise = os.path.join(self.path_save_folder,temp_df_path_uncertainties_classification_noise.iloc[0]['path'])
 		temp_distribution_noise = pd.read_csv(temp_df_path_uncertainties_classification_noise)#.iloc[:,1:]
 		temp_distribution_noise = temp_distribution_noise.replace(np.nan, None)
+		temp_distribution_noise = temp_distribution_noise['classification_noise'].to_list()
 	  
 	  
 		for i_row in range(len(sample_df)):
