@@ -17,7 +17,7 @@ import random
 from PIL import Image, ImageDraw, ImageFilter
 import cv2
 from random import randint, seed
-from math import pi, sin, radians, cos, dist, sqrt, acos
+from math import pi, sin, radians, cos, dist, sqrt, acos, ceil
 
 
 from multiprocessing import Process, Manager, get_start_method
@@ -911,12 +911,14 @@ class MorphShapes_DB_Builder:
 		''' 
 		self.enable_multiprocess = enable_multiprocess
 		self.enable_fork = enable_fork
-		
+		self.csv_path = csv_path
+		self.images = 0
+
 		path_csv_to_read = os.path.join(csv_path,
 									  'combined_dataframe.csv')
 		self.df = pd.read_csv(path_csv_to_read)
 		
-		image_save_path = os.path.join(csv_path,'dataset_images')
+		image_save_path = os.path.join(csv_path, "dataset_images")
 		
 		# If exists, destroy
 		if os.path.isdir(image_save_path):
@@ -947,6 +949,7 @@ class MorphShapes_DB_Builder:
 		# parallelo su unix con fork
 		if self.enable_multiprocess and self.enable_fork:
 			for index, row in self.df.iterrows():
+				self.images += 1
 				proc = Process(target=self.add_row, args=(index,row, area, area_noise))
 				procs.append(proc)
 				proc.start()
@@ -967,6 +970,7 @@ class MorphShapes_DB_Builder:
 				proc.join()
 		else:
 			for index, row in self.df.iterrows():
+				self.images += 1
 				self.add_row(index, row, area, area_noise)
 				
 				if self.gui != None:
@@ -980,7 +984,9 @@ class MorphShapes_DB_Builder:
 		
 		#print(len(area), len(area_noise))
 
-		
+		self.gui.pbLabel.configure(text="Compressing images...")
+		self.gui.update()
+		self._compress_images()
 			
 		# 
 		# add the shape area to the data frame
@@ -1091,12 +1097,78 @@ class MorphShapes_DB_Builder:
 		# 
 		# save output image
 		# 
-		filename = self.output_path+"/"+row['ID_image']+".png"
+		file_folder = os.path.join(self.output_path,"shape-"+str(row['shape'])+"_color-"+row['color'].strip("()").replace(" ","").replace(",","-"))
+		if not os.path.isdir(file_folder):
+			os.mkdir(file_folder)
+		filename = os.path.join(file_folder, row['ID_image']+".png")
+
 		M.save(filename)
 		#print(filename+" generated.")
 		#print(area,area_noise)
 		
-	
+	def _compress_images(self, n_row = 20, n_columns = 20):
+		# List of all (sub) folders
+		list_folders = os.listdir(self.output_path)
+		image_index = 0
+		# Iterate on each subfolder
+		for folder in list_folders:
+			# Define the path to the subfolder
+			path_folder = os.path.join(self.output_path, folder)
+			
+			# List images and define a dataframe containing required information
+			list_imgs = os.listdir(path_folder)
+			list_img =  [i for i in list_imgs if ('.png' in i)]
+			list_path = [os.path.join(path_folder, i) for i in list_imgs]
+			list_id = [int(i.split('_')[-1].split('.')[0]) for i in list_imgs]
+			
+			df_ref = pd.DataFrame()
+			df_ref['img'] = list_img
+			df_ref['id'] = list_id
+			df_ref['path'] = list_path
+			df_ref = df_ref.sort_values(by='id')
+			
+			# Load the images
+			number_imgs = n_row*n_columns
+			total_imgs = len(df_ref)
+			
+			# Initialize an empty img
+			for i in range(ceil(total_imgs/number_imgs)):
+				# Combined image name
+				img_name = 'combined_'+str(df_ref.iloc[i*number_imgs]['id'])+'_'+\
+					str(df_ref.iloc[min((i+1)*number_imgs-1,total_imgs-1)]['id'])+'.png'
+				
+				# Select the sub-df of the n_row*n_columns images to be combined
+				sub_df = df_ref.iloc[i*number_imgs:min((i+1)*number_imgs,total_imgs)]
+				
+				# Select all the corresponding images
+				sub_img_list = [Image.open(f) for f in sub_df['path']]
+				
+				# Define a canvas (grid n_rows, n_columns)
+				img_width, img_height = sub_img_list[0].size
+				combined_image = Image.new('RGBA', (n_columns*img_width, 
+													n_row*img_height), color=(0, 0, 0, 255))
+				
+				# Paste each image into the grid
+				for idx, img in enumerate(sub_img_list):
+					image_index += 1 
+					percentage = image_index/self.images
+					self.gui.pb.set(percentage)
+					self.gui.pbLabel.configure(text="Compressing images (%d%%)" % int(percentage*100))
+					self.gui.update()
+
+					row = idx // n_columns
+					col = idx % n_columns
+					x = col * img_width
+					y = row * img_height
+					combined_image.paste(img, (x, y))
+				
+				# Save the final image
+				combined_image.save(os.path.join(path_folder, img_name))
+				
+				# Remove all the remaining images
+				[os.remove(f) for f in sub_df['path']]
+			
+
 	def _get_tuple_or_value(self, cell, map_range = None):
 		# 
 		# check a cell string value if is a tuple
@@ -1598,7 +1670,7 @@ class Main_Surface:
 
 			noise = np.zeros((width, height, 3), dtype = np.uint8)
 
-			for i in range(len(noise) - 1):
+			for i in range(len(noise)):
 				cv2.randn(noise[i], mean, stddev)
 
 			im_new = cv2.addWeighted(
