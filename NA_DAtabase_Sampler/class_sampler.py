@@ -1317,7 +1317,7 @@ class Shape:
 		self._sides = sides
 		self._rotation = rotation
 		self._morph_percentage = morph_percentage 
-		self._up_factor = 10 if radius < 50 else 2
+		self._up_factor = max(min(256 // radius, 8) ,1) 
 		
 	def center(self):
 		return self._center
