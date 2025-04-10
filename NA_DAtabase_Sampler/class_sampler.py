@@ -942,7 +942,7 @@ class MorphShapes_DB_Builder:
 
 	def generate(self):
 		import psutil
-		
+
 		total_threads = psutil.cpu_count() / psutil.cpu_count(logical=False) * psutil.cpu_count()
 		'''
 		Generates the shape in the canvas based on csv data
@@ -953,8 +953,6 @@ class MorphShapes_DB_Builder:
 		
 		if self.gui != None:
 			self.gui.pb.configure(progress_color="red")
-		else:
-			print('\033[?25l', end="")
 
 		procs = []
 
@@ -1014,7 +1012,7 @@ class MorphShapes_DB_Builder:
 		self.df['regression_area_noise'] = area_noise
 		#print(self.df)
 		self.df.to_csv(self.output_csv_filename)
-		print ("Done!")
+		print ("\nDone!")
 
 	def add_row(self, index, row, area, area_noise):
 		w, h = row['pixel_resolution_x'], row['pixel_resolution_y']
@@ -1170,13 +1168,13 @@ class MorphShapes_DB_Builder:
 				# Paste each image into the grid
 				for idx, img in enumerate(sub_img_list):
 					image_index += 1 
-					percentage = int(image_index/self.images*100)
+					percentage = image_index/self.images*100
 					if self.gui != None:
 						self.gui.pb.set(percentage)
-						self.gui.pbLabel.configure(text="Compressing images (%d%%)" % percentage)
+						self.gui.pbLabel.configure(text="Compressing images (%d%%)" % int(percentage))
 						self.gui.update()
 					else:
-						print ("Compressing images (%d%%)" % percentage, end='\r')
+						TextHelper.progress_bar(percentage, 100, prefix='Compressing images:', suffix='Complete')
 
 					row = idx // n_columns
 					col = idx % n_columns
