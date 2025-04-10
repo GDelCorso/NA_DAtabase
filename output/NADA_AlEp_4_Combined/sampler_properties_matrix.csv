@@ -1,0 +1,2 @@
+dataset_size,sampling_strategy,random_seed,pixel_resolution_x,pixel_resolution_y,correct_classes,background_color,out_of_border,mark_first_vertex,correlation
+100000,MC,1891,128,128,,"(0, 0, 0)",False,False,Spearman

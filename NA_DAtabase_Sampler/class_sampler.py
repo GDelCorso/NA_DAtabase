@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 import openturns as ot
 import random
+import sys
 
 from PIL import Image, ImageDraw, ImageFilter
 import cv2
@@ -903,6 +904,14 @@ class random_sampler:
 		
 		self.generate_images()
 
+class TextHelper:
+	def progress_bar(iteration, total, prefix='', suffix='', length=30, fill='█'):
+	    percent = ("{0:.1f}").format(100 * (iteration / float(total)))
+	    filled_length = int(length * iteration // total)
+	    bar = fill * filled_length + '-' * (length - filled_length)
+	    sys.stdout.write(f'\r{prefix} |{bar}| {percent}% {suffix}')
+	    sys.stdout.flush()
+
 #%% Class to generate pictures
 class MorphShapes_DB_Builder:
 	def __init__(self, csv_path, gui = None, enable_multiprocess = False, enable_fork = False):
@@ -933,6 +942,7 @@ class MorphShapes_DB_Builder:
 
 	def generate(self):
 		import psutil
+		
 		total_threads = psutil.cpu_count() / psutil.cpu_count(logical=False) * psutil.cpu_count()
 		'''
 		Generates the shape in the canvas based on csv data
@@ -943,7 +953,9 @@ class MorphShapes_DB_Builder:
 		
 		if self.gui != None:
 			self.gui.pb.configure(progress_color="red")
-		
+		else:
+			print('\033[?25l', end="")
+
 		procs = []
 
 		# parallelo su unix con fork
@@ -960,11 +972,14 @@ class MorphShapes_DB_Builder:
 						proc.join()
 					procs = [];
 
+				percentage = index/self.df.shape[0]*100
+				
 				if self.gui != None:
-					percentage = index/self.df.shape[0]
 					self.gui.pb.set(percentage)
-					self.gui.pbLabel.configure(text="%d%%" % int(percentage*100))
+					self.gui.pbLabel.configure(text="%d%%" % int(percentage))
 					self.gui.update()
+				else:
+					TextHelper.progress_bar(percentage, 100, prefix='Progress:', suffix='Complete')
 
 			for proc in procs:
 				proc.join()
@@ -973,21 +988,24 @@ class MorphShapes_DB_Builder:
 				self.images += 1
 				self.add_row(index, row, area, area_noise)
 				
+				percentage = index/self.df.shape[0]*100
+
 				if self.gui != None:
-					percentage = index/self.df.shape[0]
 					self.gui.pb.set(percentage)
-					self.gui.pbLabel.configure(text="%d%%" % int(percentage*100))
+					self.gui.pbLabel.configure(text="%d%%" % int(percentage))
 					self.gui.update()
+				else:
+					TextHelper.progress_bar(percentage, 100, prefix='Progress:', suffix='Complete')
 
 		area = [x[1] for x in sorted(area.items())]
 		area_noise = [x[1] for x in sorted(area_noise.items())]
 		
 		#print(len(area), len(area_noise))
-
-		self.gui.pbLabel.configure(text="Compressing images...")
-		self.gui.update()
+		if self.gui != None:
+			self.gui.pbLabel.configure(text="Compressing images...")
+			self.gui.update()
 		self._compress_images()
-			
+				
 		# 
 		# add the shape area to the data frame
 		# and save the output csv
@@ -996,6 +1014,7 @@ class MorphShapes_DB_Builder:
 		self.df['regression_area_noise'] = area_noise
 		#print(self.df)
 		self.df.to_csv(self.output_csv_filename)
+		print ("Done!")
 
 	def add_row(self, index, row, area, area_noise):
 		w, h = row['pixel_resolution_x'], row['pixel_resolution_y']
@@ -1151,10 +1170,13 @@ class MorphShapes_DB_Builder:
 				# Paste each image into the grid
 				for idx, img in enumerate(sub_img_list):
 					image_index += 1 
-					percentage = image_index/self.images
-					self.gui.pb.set(percentage)
-					self.gui.pbLabel.configure(text="Compressing images (%d%%)" % int(percentage*100))
-					self.gui.update()
+					percentage = int(image_index/self.images*100)
+					if self.gui != None:
+						self.gui.pb.set(percentage)
+						self.gui.pbLabel.configure(text="Compressing images (%d%%)" % percentage)
+						self.gui.update()
+					else:
+						print ("Compressing images (%d%%)" % percentage, end='\r')
 
 					row = idx // n_columns
 					col = idx % n_columns
