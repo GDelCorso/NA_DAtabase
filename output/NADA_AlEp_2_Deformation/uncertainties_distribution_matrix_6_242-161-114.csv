@@ -1,5 +1,0 @@
-,deformation,blur,white_noise,holes,additive_noise_regression,multiplicative_noise_regression
-lower_bound,0,,,,,
-mean,,0,0,0,0,0
-sigma,,,,,,
-upper_bound,90,,,,,

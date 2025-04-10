@@ -1,5 +1,0 @@
-,centre_x,centre_y,radius,rotation_(degrees)
-lower_bound,20,20,10,0
-mean,,,,
-sigma,,,,
-upper_bound,80,80,20,360
