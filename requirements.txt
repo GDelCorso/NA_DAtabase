@@ -1,6 +1,8 @@
-numpy
-tkinter
-customtkinter
-CTkMessagebox
-pandas
-openturns
+numpy==1.22.3
+tkinter==8.5
+customtkinter==5.2.2
+CTkMessagebox==2.5
+pandas==1.5.3
+opencv-python==4.8.1.78
+Pillow==10.1.0
+openturns==1.23
