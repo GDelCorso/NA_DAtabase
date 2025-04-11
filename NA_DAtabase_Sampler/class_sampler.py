@@ -1123,7 +1123,7 @@ class MorphShapes_DB_Builder:
 		#print(filename+" generated.")
 		#print(area,area_noise)
 		
-	def _compress_images(self, n_row = 20, n_columns = 20):
+	def _compress_images(self, n_row = 10, n_columns = 10):
 		# List of all (sub) folders
 		list_folders = os.listdir(self.output_path)
 		image_index = 0
