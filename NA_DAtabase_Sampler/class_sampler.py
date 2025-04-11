@@ -1115,8 +1115,13 @@ class MorphShapes_DB_Builder:
 		# save output image
 		# 
 		file_folder = os.path.join(self.output_path,"shape-"+str(row['shape'])+"_color-"+row['color'].strip("()").replace(" ","").replace(",","-"))
-		if not os.path.isdir(file_folder):
-			os.mkdir(file_folder)
+		
+		try:
+			if not os.path.exists(file_folder):
+				os.mkdir(file_folder)
+		except:
+			print("",end="")
+
 		filename = os.path.join(file_folder, row['ID_image']+".png")
 
 		M.save(filename)
