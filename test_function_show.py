@@ -22,6 +22,7 @@ import shutil
 import random
 import cv2 
 import pandas as pd
+from aux_data_load import load_img_name
 
 #%% Call the parser to receive the input path
 try:
@@ -45,10 +46,12 @@ else:
 
 path_to_folder = os.path.join(os.getcwd(),sys.argv[1])
 path_to_images = os.path.join(path_to_folder, 'dataset_images')
-list_images = os.listdir(path_to_images)
+
 
 path_to_dataframe = os.path.join(path_to_folder, 'combined_dataframe.csv')
 df = pd.read_csv(path_to_dataframe)
+
+list_images = df['ID_image']
 
 #%% Repeat for the number of views:
 for i in range(int(sys.argv[2])):
@@ -60,11 +63,11 @@ for i in range(int(sys.argv[2])):
     name_list = []
     row_list = []
     for j in path_to_images_selected:
-        path_tmp_image = os.path.join(path_to_images, j)
-        tmp_image = cv2.imread(path_tmp_image)
-        tmp_image = cv2.cvtColor(tmp_image, cv2.COLOR_BGR2RGB)
+        tmp_image = load_img_name(j, path_to_images)
+        
         image_list.append(tmp_image)
-        name_list.append(j.split('.')[0].split('_')[-1])
+
+        name_list.append(j)
         row_list.append(df[df['ID_image']==j.split('.')[0]])
         
 
